@@ -1,0 +1,4 @@
+no host:
+
+export DISPLAY=:0.0
+xhost +
