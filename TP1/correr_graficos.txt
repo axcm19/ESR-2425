@@ -2,3 +2,11 @@ no host:
 
 export DISPLAY=:0.0
 xhost +
+
+
+ffmpeg -i videoB.mp4 -s 300x226 -c:v libx264 -b:v 200k -bf 2 -g 50 -sc_threshold 0 -an -dash 1 -pix_fmt yuv420p videoB_300_226_200k.mp4
+ffmpeg -i videoB.mp4 -s 720x540 -c:v libx264 -b:v 500k -bf 2 -g 50 -sc_threshold 0 -an -dash 1 -pix_fmt yuv420p videoB_720_540_500k.mp4
+ffmpeg -i videoB.mp4 -s 960x720 -c:v libx264 -b:v 1000k -bf 2 -g 50 -sc_threshold 0 -an -dash 1 -pix_fmt yuv420p videoB_960_720_1000k.mp4
+MP4Box -dash 500 -out video_manifest videoB_300_226_200k.mp4 videoB_720_540_500k.mp4 videoB_960_720_1000k.mp4
+mini_httpd -p 8888 -d ./ -D
+firefox http://10.0.0.10:8888 video_dash.html  
