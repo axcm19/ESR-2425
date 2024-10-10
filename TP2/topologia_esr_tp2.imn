@@ -545,6 +545,7 @@ link l2 {
 }
 
 link l3 {
+    color Magenta
     nodes {n20 n21}
     bandwidth 0
 }
@@ -555,6 +556,7 @@ link l4 {
 }
 
 link l5 {
+    color Magenta
     nodes {n18 n20}
     bandwidth 0
 }
@@ -565,6 +567,7 @@ link l6 {
 }
 
 link l7 {
+    color Magenta
     nodes {n15 n18}
     bandwidth 0
 }
@@ -575,6 +578,7 @@ link l8 {
 }
 
 link l9 {
+    color Magenta
     nodes {n16 n18}
     bandwidth 0
 }
@@ -595,6 +599,7 @@ link l12 {
 }
 
 link l13 {
+    color Magenta
     nodes {n15 n12}
     bandwidth 0
 }
@@ -615,6 +620,7 @@ link l16 {
 }
 
 link l17 {
+    color Magenta
     nodes {n13 n16}
     bandwidth 0
 }
@@ -625,6 +631,7 @@ link l18 {
 }
 
 link l19 {
+    color Magenta
     nodes {n11 n15}
     bandwidth 0
 }
