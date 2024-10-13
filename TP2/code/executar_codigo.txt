@@ -1,0 +1,35 @@
+Para iniciar o serviço de streaming, será necessário correr três programas diferentes, sendo eles o server, oNode e o client.
+
+	- Primeiramente, deverá ser executado o programa server em todos os servidores da topologia, passando como argumentos o caminho para o ficheiro json que contém a configuração de toda a topologia 
+	e o segundo é um caracter numérico 1 ou 0, o 1 é usado para exprimir que esse servidor será o principal (bootstraper), servindo para conectar todos os nodos, e 0 será usada para os restantes servidores.
+
+	- Seguidamente será executado o oNode em todos o routers pertencentes à rede overlay, este programa terá um único argumento, sendo ele o IP do bootstraper.
+	
+	- Por fim, quando um cliente realiza um pedido de stream, este deve executar o client, passando 2 argumentos, o primeiro é o IP do nodo vizinho, pertencente à rede overlay, e o ultimo o nome 
+	do ficheiro de vídeo que pretende receber. Na interface que aparece, deve-se clicar primeiro em "Setup" (que define que a stream será em UDP) e só depois no "Play".
+
+
+
+---> no host:
+
+su - core
+cd /home/core/Desktop/ESR-2425/TP2/code
+export DISPLAY=:0.0
+
+
+
+---> se for nó intermédio, point of presence ou servidor usar este
+
+python3 server.py topo_overlay.json 1
+python3 oNode.py 10.0.25.10
+
+
+
+---> se for nó cliente usar este
+
+python3 oClient
+python3 client.py 10.0.6.2 movie.Mjpeg (c1)
+python3 client.py 10.0.9.2 movie.Mjpeg (c2)
+
+
+
