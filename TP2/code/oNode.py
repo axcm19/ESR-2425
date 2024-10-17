@@ -2,6 +2,7 @@ import socket
 import pickle
 import sys
 import database
+from server import run_server
 from threading import Thread
 import time
 from time import sleep
@@ -374,12 +375,51 @@ def clientConnections(database):
 
 if __name__ == '__main__':
 
+        # python3 oNode.py -s topologias/topo_overlay.json 1
+        # python3 oNode.py -n 10.0.25.10
+        # python3 oNode.py -pop 10.0.25.10
+
+        if(sys.argv[1] == "-s"):
+                if(sys.argv[2] == "" or sys.argv[3] == ""):
+                        print("Server needs to know the topology and if he is bootstrap")
+                else:
+                   run_server(sys.argv[2], sys.argv[3])
+
+
+        if(sys.argv[1] == "-n"):
+                if(sys.argv[2] == ""):
+                        print("Inter-node needs to know who is the bootstrap")
+                else:
+                        database = database.database()          # construtor da database associada ao onode, que vai guardar as informações e métricas do nodo relativamente à sua vizinhança
+                        bootstrapper = sys.argv[2]              # endereço do bootstrapper que vai permitir conhecer a topologia
+                        Thread(target=neighboursRequest, args = (bootstrapper,database)).start()
+                        Thread(target=receiveStreamVerification, args = (database,)).start()
+                        Thread(target=receiveStreamRequest, args = (database,)).start() 
+
+
+        if(sys.argv[1] == "-pop"):
+                if(sys.argv[2] == ""):
+                        print("Point of presence needs to know who is the bootstrap")
+                else:
+                        database = database.database()          # construtor da database associada ao onode, que vai guardar as informações e métricas do nodo relativamente à sua vizinhança
+                        bootstrapper = sys.argv[2]              # endereço do bootstrapper que vai permitir conhecer a topologia
+                        Thread(target=neighboursRequest, args = (bootstrapper,database)).start()
+                        Thread(target=clientConnections, args = (database,)).start()
+                        Thread(target=receiveStreamVerification, args = (database,)).start()
+                        Thread(target=receiveStreamRequest, args = (database,)).start() 
+
+        
+
+        """
+        versão original
+
         database = database.database()          # construtor da database associada ao onode, que vai guardar as informações e métricas do nodo relativamente à sua vizinhança
         bootstrapper = sys.argv[1]              # endereço do bootstrapper que vai permitir conhecer a topologia
         Thread(target=neighboursRequest, args = (bootstrapper,database)).start()
         Thread(target=clientConnections, args = (database,)).start()
         Thread(target=receiveStreamVerification, args = (database,)).start()
         Thread(target=receiveStreamRequest, args = (database,)).start()        
+        """
        
 
         

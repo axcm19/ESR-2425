@@ -138,11 +138,15 @@ def receiveStreamRequest(database):
 
                    
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
+def run_server(topologia, opt_boot):
 
     database = b_database.b_database()
-    database.setTopo(readConfigFile(sys.argv[1]))
-    option = int(sys.argv[2])
+    database.setTopo(readConfigFile(topologia))
+    option = int(opt_boot)
+
+    #database.setTopo(readConfigFile(sys.argv[1]))
+    #option = int(sys.argv[2])
 
     if(option==1):      # valor 1 indica que é o bootstrapper, caso o valor seja 0 é um servidor normal
         Thread(target=initializeConnections, args = (database,)).start()
