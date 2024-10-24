@@ -408,18 +408,7 @@ if __name__ == '__main__':
                         Thread(target=receiveStreamVerification, args = (database,)).start()
                         Thread(target=receiveStreamRequest, args = (database,)).start() 
 
-        
 
-        """
-        versão original
-
-        database = database.database()          # construtor da database associada ao onode, que vai guardar as informações e métricas do nodo relativamente à sua vizinhança
-        bootstrapper = sys.argv[1]              # endereço do bootstrapper que vai permitir conhecer a topologia
-        Thread(target=neighboursRequest, args = (bootstrapper,database)).start()
-        Thread(target=clientConnections, args = (database,)).start()
-        Thread(target=receiveStreamVerification, args = (database,)).start()
-        Thread(target=receiveStreamRequest, args = (database,)).start()        
-        """
        
 
         

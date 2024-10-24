@@ -28,6 +28,8 @@ python3 oNode.py -pop 10.0.25.10
 ---> se for nó cliente usar este
 
 python3 oClient.py 10.0.25.10 movie.Mjpeg
+python3 oClient.py 10.0.25.10 beach.Mjpeg
+python3 oClient.py 10.0.25.10 launch.mp4
 
 
 

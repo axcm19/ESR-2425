@@ -59,11 +59,6 @@ class ServerWorker:
 		"""Receive RTSP request from the client."""
 		self.connSocket = self.clientInfo['rtspSocket'][0]
 
-		if isinstance(self.connSocket, socket.socket):
-			print("connSocket é um socket válido.")
-		else:
-			print("Erro: connSocket não é um socket válido!")
-			return
 
 		while True:
 			data = self.connSocket.recv(256)
@@ -71,8 +66,6 @@ class ServerWorker:
 			if data:
 				print("Data received:\n" + data.decode("utf-8"))
 				self.processRtspRequest(data.decode("utf-8"))
-			else:
-				print("no data")  
 
 
 	
