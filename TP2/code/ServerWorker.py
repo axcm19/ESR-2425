@@ -65,8 +65,7 @@ class ServerWorker:
 			print("Erro: connSocket não é um socket válido!")
 			return
 
-		while True:  
-			print("vou analisar o pedido")    
+		while True:
 			data = self.connSocket.recv(256)
 
 			if data:

@@ -154,6 +154,8 @@ class database:
             jumps = 9999999999
             for neighbour in self.serverStatus.keys():
                 if(neighbour not in comeFrom):
+
+                    """
                     print(self.serverStatus[neighbour]['timestamp'] , timestamp)
                     # em caso de a variacao ser superior a 10% verifica-se o nº de saltos
                     if abs(self.serverStatus[neighbour]['timestamp'] - timestamp) < 0.1 * min(self.serverStatus[neighbour]['timestamp'],timestamp):
@@ -165,8 +167,19 @@ class database:
                         neighbourAux = neighbour
                         timestamp = self.serverStatus[neighbour]['timestamp'] 
                         jumps = self.serverStatus[neighbour]['jumps']
+
+                        """
+                    
+                    #print(self.serverStatus[neighbour]['jumps'] , jumps)
+                    print(f"Jumps to reach server = {self.serverStatus[neighbour]['jumps']}")
+
+
+                    if (self.serverStatus[neighbour]['jumps'] < jumps):
+                            neighbourAux = neighbour
+                            timestamp = self.serverStatus[neighbour]['timestamp']
+                            jumps = self.serverStatus[neighbour]['jumps']  
                 
-                
+                    
                     print(neighbour,neighbourAux)
                 
             return neighbourAux
@@ -190,6 +203,8 @@ class database:
             jumps = 9999999999
             for neighbour in dict.keys():
                 print(dict[neighbour]['timestamp'] , timestamp)
+
+                """
                 # em caso de a variacao ser superior a 10% verifica-se o nº de saltos
                 if (abs(dict[neighbour]['timestamp'] - timestamp) < 0.1 * timestamp):
                     if dict[neighbour]['jumps'] < jumps:
@@ -200,6 +215,15 @@ class database:
                     neighbourAux = neighbour
                     timestamp = dict[neighbour]['timestamp']
                     jumps = dict[neighbour]['jumps']
+
+                """
+
+                print(f"Best neighbour = {dict[neighbour]}, jumps to reach him = {dict[neighbour]['jumps']}")
+
+                if dict[neighbour]['jumps'] < jumps:
+                        timestamp = dict[neighbour]['timestamp']
+                        neighbourAux = neighbour
+                        jumps = dict[neighbour]['jumps']
                 
                 print(neighbour,neighbourAux)
             

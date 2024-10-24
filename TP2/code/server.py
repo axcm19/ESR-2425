@@ -136,6 +136,48 @@ def receiveStreamRequest(database):
                 else:
                     database.changeStreamState(filename)
 
+
+# Thread que vai receber as conexões dos clientes, por cada uma delas, vai criar uma thread para tratar da autenticação do cliente
+def clientConnectionsLoginReceive(database):
+
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.bind(('', 2666))  
+        server_socket.listen(10)        # 10 conexoes no maximo
+        
+        while True:
+            conn, address = server_socket.accept()  # accept new connection
+            port = conn.recv(1024).decode()
+            print(port, 'from ' + address[0])
+            conn.close()  # close the connection
+
+            Thread(target=clientConnectionsLoginSend, args = (address[0],port, database)).start()
+
+
+
+# Thread que vai responder as conexões dos clientes, por cada uma delas
+def clientConnectionsLoginSend(client_to_respond, port_to_receive, database):
+
+        port =  int(port_to_receive)
+        client_socket = socket.socket()  # instanciar
+        client_socket.connect((client_to_respond, port))  # conectar ao cliente (oNode mais proximo)
+        
+        allNodes = database.getTopo()
+        popsList = []
+
+        # ir buscar todos os pops
+        for n in allNodes:
+             if("s" not in n):  # servidor nunca vai set POP
+                if allNodes[n]['pop'] != []:
+                     for ip in allNodes[n]['pop']:
+                        popsList.append(ip)
+
+
+        print(f"List of points of presence available = {popsList}")
+
+        client_socket.send(pickle.dumps(popsList))  # send data to the client
+        print('finished sending pops to client')
+       
+
                    
 
 #if __name__ == '__main__':
@@ -150,6 +192,8 @@ def run_server(topologia, opt_boot):
 
     if(option==1):      # valor 1 indica que é o bootstrapper, caso o valor seja 0 é um servidor normal
         Thread(target=initializeConnections, args = (database,)).start()
+        Thread(target=clientConnectionsLoginReceive, args = (database,)).start()
+
     Thread(target=sendStatusServerNetwork, args = (database,)).start()
     Thread(target=receiveStreamRequest, args = (database,)).start()
     

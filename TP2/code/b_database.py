@@ -8,6 +8,7 @@ class b_database:
         self.peersConnected = 0
         self.file = []
         self.streams = {}
+        self.pops = []
 
     #obter o nº de peers conectados
     def getPeersConnected(self):
@@ -37,7 +38,7 @@ class b_database:
     def getNumberPeer(self):
         r=0
         for key in self.topo:
-            if("s1" not in key):
+            if("s" not in key):
                 r = r + 1
         return r
 

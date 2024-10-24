@@ -27,8 +27,7 @@ python3 oNode.py -pop 10.0.25.10
 
 ---> se for nó cliente usar este
 
-python3 oClient.py 10.0.7.2 movie.Mjpeg (c1)
-python3 oClient.py 10.0.9.2 movie.Mjpeg (c2)
+python3 oClient.py 10.0.25.10 movie.Mjpeg
 
 
 

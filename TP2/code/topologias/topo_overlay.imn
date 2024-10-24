@@ -796,17 +796,6 @@ annotation a9 {
     canvas c1
 }
 
-annotation a10 {
-    iconcoords {793.0 583.0}
-    type text
-    label {O7}
-    labelcolor #d801f1
-    fontfamily {Arial}
-    fontsize {20}
-    effects {bold}
-    canvas c1
-}
-
 annotation a11 {
     iconcoords {1012.0 136.0}
     type text
@@ -876,105 +865,6 @@ annotation a17 {
     type text
     iconcoords {188.0 664.0}
     label {}
-    canvas c1
-}
-
-annotation a20 {
-    iconcoords {1000.0 118.0}
-    type text
-    label {10.0.10.2}
-    labelcolor #d801f1
-    fontfamily {Arial}
-    fontsize {10}
-    effects {bold}
-    canvas c1
-}
-
-annotation a18 {
-    iconcoords {779.0 601.0}
-    type text
-    label {10.0.14.1}
-    labelcolor #d801f1
-    fontfamily {Arial}
-    fontsize {10}
-    effects {bold}
-    canvas c1
-}
-
-annotation a19 {
-    iconcoords {1519.0 509.0}
-    type text
-    label {10.0.19.2}
-    labelcolor #d801f1
-    fontfamily {Arial}
-    fontsize {10}
-    effects {bold}
-    canvas c1
-}
-
-annotation a21 {
-    iconcoords {1745.0 348.0}
-    type text
-    label {10.0.25.10}
-    labelcolor #d801f1
-    fontfamily {Arial}
-    fontsize {10}
-    effects {bold}
-    canvas c1
-}
-
-annotation a22 {
-    iconcoords {1269.0 353.0}
-    type text
-    label {10.0.18.2}
-    labelcolor #d801f1
-    fontfamily {Arial}
-    fontsize {10}
-    effects {bold}
-    canvas c1
-}
-
-annotation a23 {
-    iconcoords {786.0 362.0}
-    type text
-    label {10.0.11.1}
-    labelcolor #d801f1
-    fontfamily {Arial}
-    fontsize {10}
-    effects {bold}
-    canvas c1
-}
-
-annotation a24 {
-    iconcoords {782.0 153.0}
-    type text
-    label {10.0.10.1}
-    labelcolor #d801f1
-    fontfamily {Arial}
-    fontsize {10}
-    effects {bold}
-    canvas c1
-}
-
-annotation a25 {
-    iconcoords {21.0 569.0}
-    type text
-    label {10.0.1.21}
-    labelcolor #d801f1
-    fontfamily {Arial}
-    fontsize {10}
-    effects {bold}
-    canvas c1
-}
-
-annotation a26 {
-    iconcoords {23.0 159.0}
-    type text
-    label {10.0.0.20}
-    labelcolor #d801f1
-    fontfamily {Arial}
-    fontsize {10}
-    effects {bold}
     canvas c1
 }
 
