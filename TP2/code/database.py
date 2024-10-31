@@ -1,6 +1,8 @@
 import socket
+import subprocess
 import traceback
 from time import sleep
+
 
 
 class database:
@@ -145,6 +147,24 @@ class database:
         except Exception:
             # traceback.print_exc()
             return None
+
+
+    def checkLatencyWithPing(self, ip):
+        # Executa o comando ping e captura a saída
+        try:
+            output = subprocess.check_output(["ping", "-c", "1", ip], universal_newlines=True)
+            
+            # Procura pelo tempo de resposta na saída
+            for line in output.splitlines():
+                if "time=" in line:
+                    time = line.split("time=")[1].split(" ")[0]
+                    return float(time)
+                
+        except subprocess.CalledProcessError:
+            # Se o ping falhar
+            print(f"Cant ping {ip}")
+            return None
+
          
     # obter as melhores métricas para o STATUS (monitorização da rede), sendo o 1º caso de decisao o timestamp, e o 2º caso de decisao o numero de saltos
     def getBestMetricsServerStatus(self,comeFrom):
@@ -152,9 +172,24 @@ class database:
             timestamp = 9999999999
             neighbourAux = ''
             jumps = 9999999999
+
+            print(self.serverStatus.keys())
+
             for neighbour in self.serverStatus.keys():
+                
                 if(neighbour not in comeFrom):
 
+                    print(f"Neighbour = {neighbour}")
+
+	            """
+                    responseTime = self.checkLatencyWithPing(neighbour)
+                    print(f"Neighbour response time = {responseTime}")
+
+                    if abs(responseTime < timestamp):
+                            neighbourAux = neighbour
+                            timestamp = responseTime
+
+               
                     """
                     print(self.serverStatus[neighbour]['timestamp'] , timestamp)
                     # em caso de a variacao ser superior a 10% verifica-se o nº de saltos
@@ -168,7 +203,7 @@ class database:
                         timestamp = self.serverStatus[neighbour]['timestamp'] 
                         jumps = self.serverStatus[neighbour]['jumps']
 
-                        """
+                        
                     
                     #print(self.serverStatus[neighbour]['jumps'] , jumps)
                     print(f"Jumps to reach server = {self.serverStatus[neighbour]['jumps']}")
@@ -177,8 +212,8 @@ class database:
                     if (self.serverStatus[neighbour]['jumps'] < jumps):
                             neighbourAux = neighbour
                             timestamp = self.serverStatus[neighbour]['timestamp']
-                            jumps = self.serverStatus[neighbour]['jumps']  
-                
+                            jumps = self.serverStatus[neighbour]['jumps'] 
+                    
                     
                     print(neighbour,neighbourAux)
                 

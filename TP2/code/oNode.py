@@ -116,7 +116,6 @@ def receiveStreamRequest(database):
                         database.removeStreamReceiver(filename,address)
                 
 
-
                 
 
 # Verificar a stream na vizinhança e mandar resposta
@@ -145,6 +144,7 @@ def verifyStreamInNeighbourHood(database, filename,visited):
                         index = index + 1
 
 
+        
         for neighbour in database.getNeighbours():
                 if neighbour not in visited:
                         # print('verify', neighbour)
@@ -169,6 +169,8 @@ def verifyStreamInNeighbourHood(database, filename,visited):
                                                         metricsDict['jumps'] = float(s[1]) + 1
                                        
                                         database.putRouteStreamDict(filename,neighbour,metricsDict)
+        
+        
                                
                         
 # receber a verificação da stream e ver como pode fazer chegar a stream
