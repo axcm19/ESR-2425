@@ -25,7 +25,7 @@ def getMyNames():
 # obter a stream a partir das melhores metricas
 def getStream(database,filename,comeFrom,server):
 
-        print('getting stream',flush=True)
+        print('\nDetermining were to get stream',flush=True)
 
         bestNeighbour = ''
 
@@ -45,7 +45,7 @@ def getStream(database,filename,comeFrom,server):
         else :
                 msg       = f'{filename} 0'
         
-        print(bestNeighbour)
+        #print(bestNeighbour)
         
         # uso de UDP para enviar o request da stream
         udpSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -160,11 +160,19 @@ def verifyStreamInNeighbourHood(database, filename,visited):
                         if response != 'NAK':                   # caso tenha uma resposta para a stream envia as metricas e o vizinho
                                         metricsDict = {}
                                         splitted = re.split(' ',response)
+
+                                        print("\nfunção verifyStreamInNeighbourHood")
+                                        print(f"calculated timestamp = {receiveTime - sendTime} ms")
+
                                         for string in splitted:
                                                 s = re.split(r':',string)
+
+                                                print(f"string = {string}")
+
                                                 if s[0] == 'time':
                                                         metricsDict['time'] = float(s[1])
                                                         metricsDict['timestamp'] = time.time() - float(s[1])
+                                                        print(f"timestamp in dict = {metricsDict['timestamp']}")
                                                 if s[0] == 'jumps':
                                                         metricsDict['jumps'] = float(s[1]) + 1
                                        

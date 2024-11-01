@@ -167,13 +167,15 @@ class database:
 
          
     # obter as melhores métricas para o STATUS (monitorização da rede), sendo o 1º caso de decisao o timestamp, e o 2º caso de decisao o numero de saltos
+    # usado apenas quando uma única stream decorre na rede
     def getBestMetricsServerStatus(self,comeFrom):
+            
+            print(f"First one to get stream")
         
             timestamp = 9999999999
             neighbourAux = ''
             jumps = 9999999999
 
-            print(self.serverStatus.keys())
 
             for neighbour in self.serverStatus.keys():
                 
@@ -181,17 +183,19 @@ class database:
 
                     print(f"Neighbour = {neighbour}")
 
-	            """
+                    """
                     responseTime = self.checkLatencyWithPing(neighbour)
                     print(f"Neighbour response time = {responseTime}")
 
                     if abs(responseTime < timestamp):
                             neighbourAux = neighbour
                             timestamp = responseTime
+                    """
 
                
-                    """
-                    print(self.serverStatus[neighbour]['timestamp'] , timestamp)
+                    #print(self.serverStatus[neighbour]['timestamp'] , timestamp)
+
+
                     # em caso de a variacao ser superior a 10% verifica-se o nº de saltos
                     if abs(self.serverStatus[neighbour]['timestamp'] - timestamp) < 0.1 * min(self.serverStatus[neighbour]['timestamp'],timestamp):
                         if (self.serverStatus[neighbour]['jumps'] < jumps):
@@ -206,7 +210,6 @@ class database:
                         
                     
                     #print(self.serverStatus[neighbour]['jumps'] , jumps)
-                    print(f"Jumps to reach server = {self.serverStatus[neighbour]['jumps']}")
 
 
                     if (self.serverStatus[neighbour]['jumps'] < jumps):
@@ -215,7 +218,8 @@ class database:
                             jumps = self.serverStatus[neighbour]['jumps'] 
                     
                     
-                    print(neighbour,neighbourAux)
+                    print(f"Jumps to reach server = {self.serverStatus[neighbour]['jumps']}")
+                    #print(neighbour,neighbourAux)
                 
             return neighbourAux
     
@@ -230,37 +234,44 @@ class database:
 
 
     # calcular as melhores metricas para uma stream (1º timestamp, 2º jumps)
+    # usado quando já existe uma stream na rede
     def getBestMetricsRouteStreamDict(self,filename):
+            
+            print("Trying to get stream from a neighbour who is already streaming")
+
             dict =  self.routeStreamDict[filename]
 
             timestamp = 9999999999
             neighbourAux = ''
             jumps = 9999999999
-            for neighbour in dict.keys():
-                print(dict[neighbour]['timestamp'] , timestamp)
 
-                """
+            for neighbour in dict.keys():
+
+                print(f"Neighbour = {neighbour}")
+
+                #print(dict[neighbour]['timestamp'] , timestamp)
+            
                 # em caso de a variacao ser superior a 10% verifica-se o nº de saltos
                 if (abs(dict[neighbour]['timestamp'] - timestamp) < 0.1 * timestamp):
                     if dict[neighbour]['jumps'] < jumps:
                         timestamp = dict[neighbour]['timestamp']
                         neighbourAux = neighbour
                         jumps = dict[neighbour]['jumps']
+                        
                 elif dict[neighbour]['timestamp'] < timestamp:
                     neighbourAux = neighbour
                     timestamp = dict[neighbour]['timestamp']
                     jumps = dict[neighbour]['jumps']
 
-                """
-
-                print(f"Best neighbour = {dict[neighbour]}, jumps to reach him = {dict[neighbour]['jumps']}")
 
                 if dict[neighbour]['jumps'] < jumps:
                         timestamp = dict[neighbour]['timestamp']
                         neighbourAux = neighbour
                         jumps = dict[neighbour]['jumps']
+
+                print(f"Closest stream in {dict[neighbour]['jumps']} jumps")
                 
-                print(neighbour,neighbourAux)
+                #print(neighbour,neighbourAux)
             
             return neighbourAux
     
