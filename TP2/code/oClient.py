@@ -111,7 +111,7 @@ def loginReceive(filename, port_to_receive):
     # Verifica qual IP tem o menor tempo
     mypop = min(times, key=times.get)
     
-    print(f"Conectando ao POP em {mypop}")
+    print(f"Connecting to POP at port {mypop}")
 
     Thread(target=send, args=(mypop, filename)).start()
 
