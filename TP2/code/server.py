@@ -140,42 +140,60 @@ def receiveStreamRequest(database):
 # Thread que vai receber as conexões dos clientes, por cada uma delas, vai criar uma thread para tratar da autenticação do cliente
 def clientConnectionsLoginReceive(database):
 
+    try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.bind(('', 2666))  
-        server_socket.listen(10)        # 10 conexoes no maximo
-        
+        server_socket.bind(('', 2666))
+        server_socket.listen(10)  # Max 10 connections
+
         while True:
-            conn, address = server_socket.accept()  # accept new connection
+            conn, address = server_socket.accept()
             port = conn.recv(1024).decode()
-            print(port, 'from ' + address[0])
-            conn.close()  # close the connection
+            print(f"Received port {port} from {address[0]}")
+            conn.close()
 
-            Thread(target=clientConnectionsLoginSend, args = (address[0],port, database)).start()
-
-
+            # Start a thread to handle each client connection with the provided port and database
+            Thread(target=clientConnectionsLoginSend, args=(address[0], int(port), database)).start()
+    
+    except Exception as e:
+        print(f"Error in clientConnectionsLoginReceive: {e}")
+    finally:
+        server_socket.close()
 
 # Thread que vai responder as conexões dos clientes, por cada uma delas
 def clientConnectionsLoginSend(client_to_respond, port_to_receive, database):
 
-        port =  int(port_to_receive)
-        client_socket = socket.socket()  # instanciar
-        client_socket.connect((client_to_respond, port))  # conectar ao cliente (oNode mais proximo)
         
-        allNodes = database.getTopo()
-        popsList = []
+    for attempt in range(3):
+        port = int(port_to_receive)
+        try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)# Set up the client socket
+            client_socket.connect((client_to_respond, port))  # Connect to the specified client
+            print(f"Connected to client at {client_to_respond}:{port}")
+            break
+        except ConnectionRefusedError:
+            print(f"Attempt {attempt + 1}: Connection refused, retrying...")
+            time.sleep(1)
+    else:
+        print("Failed to connect to client after multiple attempts.")
+        return
+    
+    # Retrieve all nodes from the database
+    allNodes = database.getTopo()
+    popsList = []
 
-        # ir buscar todos os pops
-        for n in allNodes:
-             if("s" not in n):  # servidor nunca vai set POP
-                if allNodes[n]['pop'] != []:
-                     for ip in allNodes[n]['pop']:
-                        popsList.append(ip)
+    # Collect all points of presence (POP) IPs from the nodes, excluding server nodes
+    for n in allNodes:
+        if "s" not in n:  # Assuming "s" denotes server nodes
+            if allNodes[n].get('pop'):  # Check if 'pop' key exists and is not empty
+                popsList.extend(allNodes[n]['pop'])  # Add all IPs in 'pop' to popsList
 
+    print(f"List of points of presence available = {popsList}")
 
-        print(f"List of points of presence available = {popsList}")
-
-        client_socket.send(pickle.dumps(popsList))  # send data to the client
-        print('finished sending pops to client')
+    # Send the list of POPs to the client
+    client_socket.send(pickle.dumps(popsList))
+    print('Finished sending POPs to client')
+    
+    client_socket.close()
        
 
                    

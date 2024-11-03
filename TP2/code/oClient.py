@@ -52,14 +52,19 @@ def checkLatencyWithPing(ip):
 
 def loginSend(host_to_connect, filename):
 
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((host_to_connect, 2666))  # Conectar ao servidor
+    try:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((host_to_connect, 2666))  # Connect to the server
 
-    port_to_receive = f'{random.randint(6000, 7000)}' 
-    print(f"Connecting to server {host_to_connect} in port = {port_to_receive}")
-    client_socket.send(port_to_receive.encode())  # Enviar a porta para o servidor
+        port_to_receive = random.randint(6000, 7000) 
+        print(f"Connecting to server {host_to_connect} on port = {port_to_receive}")
+        client_socket.send(str(port_to_receive).encode())  # Send port to server
 
-    Thread(target=loginReceive, args=(filename,port_to_receive)).start()
+        client_socket.close()  # Close the client socket after sending port
+        Thread(target=loginReceive, args=(filename, port_to_receive)).start()
+    
+    except Exception as e:
+        print(f"Error in loginSend: {e}")
 
 
 
