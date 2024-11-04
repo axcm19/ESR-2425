@@ -143,7 +143,7 @@ def clientConnectionsLoginReceive(database):
     try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind(('', 2666))
-        server_socket.listen(10)  # Max 10 connections
+        server_socket.listen(socket.SOMAXCONN)  # determinar automaticamente um valor máximo razoável de connections
 
         while True:
             conn, address = server_socket.accept()
