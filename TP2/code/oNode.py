@@ -10,6 +10,12 @@ import re
 import netifaces
 import ServerWorker
 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 # obter as interfaces do oNode
 def getMyNames():
         mynames = []
@@ -20,6 +26,11 @@ def getMyNames():
                                     mynames.append(link['addr'])
                 index = index + 1
         return mynames
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 
 
 # obter a stream a partir das melhores metricas
@@ -69,7 +80,11 @@ def getStream(database,filename,comeFrom,server):
         
         msg = f'{filename} TEARDOWN'
         udpSocket.sendto(msg.encode(), (bestNeighbour,6666))
-        
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
         
         
 # receber um request de stream
@@ -86,6 +101,9 @@ def receiveStreamRequest(database):
 
                 request = msg.decode()
 
+                print("função receiveStreamRequest in oNode")
+                print(f"mensagem = {msg}")
+
                 splitted = re.split(' ',request)
 
                 filename = splitted[0]
@@ -96,11 +114,13 @@ def receiveStreamRequest(database):
 
                         # perguntar recursivamente até chegar servidor
                         if server == '1':
+                                        print(f"\nask recursively until reaching the server")
                                         Thread(target=getStream, args = (database,filename,[address[0]],True)).start()  
                         
                         # perguntar recursivamente até chegar a um vizinho com a stream
                         else:   
                                 #verify if the node doesnt have the stream
+                                print(f"\nask recursively until reaching a neighbor with the stream")
                                 stream = database.getStream(filename)
                                 if stream == False:
                                         Thread(target=getStream, args = (database,filename,[],False)).start()  
@@ -114,7 +134,11 @@ def receiveStreamRequest(database):
                 # caso de dar teardown numa stream
                 else:
                         database.removeStreamReceiver(filename,address)
-                
+
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#         
 
                 
 
@@ -179,6 +203,10 @@ def verifyStreamInNeighbourHood(database, filename,visited):
                                         database.putRouteStreamDict(filename,neighbour,metricsDict)
         
         
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
                                
                         
 # receber a verificação da stream e ver como pode fazer chegar a stream
@@ -229,7 +257,11 @@ def receiveStreamVerification(database):
                                 message = f'time:{metrics["time"]} jumps:{metrics["jumps"]}'
                                 conn.send(message.encode())
 
-                                        
+                                
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
 # Inicializar a conexão com o servidor para obter a lista de vizinhos
 def neighboursRequest(host_to_connect,database):
@@ -268,6 +300,11 @@ def neighboursRequest(host_to_connect,database):
 
         print('Finished requesting neighbours...')
         Thread(target=receiveStatusServerNetwork, args = (database,)).start()
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 
                 
 # receber o STATUS
@@ -347,10 +384,15 @@ def receiveStatusServerNetwork(database):
                                         connected = True
                                     except:
                                         pass
-                                        
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
 # obter a informação do cliente e começar o tratamento do pedido através do ServerWorker
-def server(database, port):
+def server(database, port, allclients):
         try:
                 SERVER_PORT = int(port)
                 print(f"server port = {SERVER_PORT}")
@@ -361,14 +403,22 @@ def server(database, port):
                 while True:
                     clientInfo = {}
                     clientInfo['rtspSocket'] = rtspSocket.accept()
-                    ServerWorker.ServerWorker(clientInfo,database).run()
+                    ServerWorker.ServerWorker(clientInfo,database, allclients).run()
         
         except:
                 print("[Usage: Server.py Server_port]\n")
 
 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 # Thread que vai receber as conexões dos clientes, por cada uma delas, vai criar uma thread para tratar da comunicação
 def clientConnections(database):
+
+        allClients_dict = {} # dicionário onde vai guardar todos os clientes que se ligaram
 
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind(('', 2555))  
@@ -378,9 +428,14 @@ def clientConnections(database):
                 conn, address = server_socket.accept()  # accept new connection
                 port = conn.recv(1024).decode()
                 print(port, 'from ' + address[0])
-                Thread(target=server, args = (database,port)).start()
+
+                allClients_dict[address[0]] = ""
+
+                Thread(target=server, args = (database,port, allClients_dict)).start()
 
 
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
 if __name__ == '__main__':

@@ -1,0 +1,30 @@
+Na interface do cliente que aparece, deve-se clicar primeiro em "Setup" (que define que a stream será em UDP) e 
+só depois no "Play".
+
+
+
+---> no host:
+
+su - core
+
+
+---> se for servidor (1 -> bootstrapper, 0 -> normal)
+
+./script.sh s 1
+./script.sh s 0
+
+
+---> se for nó intermédio ou point of presence
+
+./script.sh n
+./script.sh pop
+
+
+---> se for cliente (indicar o ficheiro de video)
+
+./script.sh c movie.Mjpeg
+./script.sh c beach.Mjpeg
+./script.sh c launch.mp4
+
+
+

@@ -5,8 +5,20 @@ import socket, threading, sys, traceback, os
 
 from RtpPacket import RtpPacket
 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 CACHE_FILE_NAME = "cache-"
 CACHE_FILE_EXT = ".jpg"
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
 class Client:
 	SETUP_STR = 'SETUP'
@@ -25,6 +37,12 @@ class Client:
 
 	RTSP_VER = "RTSP/1.0"
 	TRANSPORT = "RTP/UDP"
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 	
 	# Initiation..
 	def __init__(self, master, serveraddr, serverport, rtpport, filename):
@@ -41,7 +59,12 @@ class Client:
 		self.teardownAcked = 0
 		self.connectToServer()
 		self.frameNbr = 0
-		
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 		
 	def createWidgets(self):
 		"""Build GUI."""
@@ -73,22 +96,46 @@ class Client:
 		self.label = Label(self.master, height=19)
 		self.label.grid(row=0, column=0, columnspan=4, sticky=W+E+N+S, padx=5, pady=5) 
 	
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def setupMovie(self):
 		"""Setup button handler."""
 		if self.state == self.INIT:
 			self.sendRtspRequest(self.SETUP)
 	
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def exitClient(self):
 		"""Teardown button handler."""
 		self.sendRtspRequest(self.TEARDOWN)		
 		self.master.destroy() # Close the gui window
 		os.remove(CACHE_FILE_NAME + str(self.sessionId) + CACHE_FILE_EXT) # Delete the cache image from video
 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def pauseMovie(self):
 		"""Pause button handler."""
 		if self.state == self.PLAYING:
 			self.sendRtspRequest(self.PAUSE)
 	
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def playMovie(self):
 		"""Play button handler."""
 		if self.state == self.READY:
@@ -98,6 +145,12 @@ class Client:
 			self.playEvent.clear()
 			self.sendRtspRequest(self.PLAY)
 	
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def listenRtp(self):		
 		"""Listen for RTP packets."""
 		while True:
@@ -124,7 +177,13 @@ class Client:
 					self.rtpSocket.shutdown(socket.SHUT_RDWR)
 					self.rtpSocket.close()
 					break
-					
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def writeFrame(self, data):
 		"""Write the received frame to a temp image file. Return the image file."""
 		cachename = CACHE_FILE_NAME + str(self.sessionId) + CACHE_FILE_EXT
@@ -133,13 +192,25 @@ class Client:
 		file.close()
 		
 		return cachename
-	
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def updateMovie(self, imageFile):
 		"""Update the image file as video frame in the GUI."""
 		photo = ImageTk.PhotoImage(Image.open(imageFile))
 		self.label.configure(image = photo, height=288) 
 		self.label.image = photo
-		
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def connectToServer(self):
 		"""Connect to the Server. Start a new RTSP/TCP session."""
 		self.rtspSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -149,6 +220,12 @@ class Client:
 		except:
 			tkMessageBox.showwarning('Connection Failed', 'Connection to \'%s\' failed.' %self.serverAddr)
 	
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def sendRtspRequest(self, requestCode):
 		"""Send RTSP request to the server."""	
 		#-------------
@@ -225,6 +302,12 @@ class Client:
 		
 		print('\nData sent:\n' + request)
 	
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def recvRtspReply(self):
 		"""Receive RTSP reply from the server."""
 		while True:
@@ -238,7 +321,13 @@ class Client:
 				self.rtspSocket.shutdown(socket.SHUT_RDWR)
 				self.rtspSocket.close()
 				break
-	
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def parseRtspReply(self, data):
 		"""Parse the RTSP reply from the server."""
 		lines = data.split('\n')
@@ -275,6 +364,12 @@ class Client:
 						# Flag the teardownAcked to close the socket.
 						self.teardownAcked = 1 
 	
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def openRtpPort(self):
 		"""Open RTP socket binded to a specified port."""
 		#-------------
@@ -293,6 +388,12 @@ class Client:
 			print('\nBind \n')
 		except:
 			tkMessageBox.showwarning('Unable to Bind', 'Unable to bind PORT=%d' %self.rtpPort)
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
 	def handler(self):
 		"""Handler on explicitly closing the GUI window."""

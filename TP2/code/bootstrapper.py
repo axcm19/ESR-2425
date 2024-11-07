@@ -8,12 +8,24 @@ import ServerWorker
 import b_database
 from time import sleep
 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 # ler o ficheiro json que corresponde à configuração da topologia (vizinhos e interfaces por nodo e servidor)
 def readConfigFile(topo):
     print('reading config file ..')
     with open(topo) as json_file:
         data = json.load(json_file)
     return data
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
 # começar o funcionamento do servidor
 def server():
@@ -29,6 +41,11 @@ def server():
 		clientInfo = {}
 		clientInfo['rtspSocket'] = rtspSocket.accept()
 		ServerWorker(clientInfo).run()		
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 
 
 # worker que lê a topologia e permite aos nodos conhecerem a sua vizinhança
@@ -54,6 +71,11 @@ def initializeConnectionsWorker(conn,address,dicTopo,database):
         conn.close()  # fechar a conexão
 
 
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 # leitura da topologia e inicialização das conexões, que aceita as conexões com cada nodo e chama o respectivo worker para cada um
 def initializeConnections(topo, database):
     
@@ -70,6 +92,9 @@ def initializeConnections(topo, database):
         conn, address = server_socket.accept()  # aceitar nova conexão
         Thread(target=initializeConnectionsWorker, args = (conn,address,dicTopo,database)).start()  # começar um novo worker para dar a conhecer a vizinhança
     
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
 

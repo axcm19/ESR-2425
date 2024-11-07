@@ -5,12 +5,19 @@ from time import sleep
 
 
 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 class database:
     neighbours : list #lista de neighbours
     serversNeighbours : list #list of servers in neighbourhood
     serverStatus : dict #metrics of server connection in neighbourhood
     streamsDict : dict #dict of streams in the node
     routeStreamDict : dict #metrics of streams in neighbourhood
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
     def __init__(self):
@@ -20,20 +27,50 @@ class database:
         self.routeStreamDict = {}
         self.metricsInNeighbourhood = {}
 
+
+    
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
     #adicionar a lista de vizinhos que são servidores
     def putServersNeighbours(self,neighbours):
         self.serversNeighbours = neighbours
 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
     def getServersNeighbours(self):
         return self.neighbours
+    
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
     #adicionar a lista de vizinhos que não nodos
     def putNeighbours(self,neighbours):
         self.neighbours = neighbours
 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
     # obter os vizinhos
     def getNeighbours(self):
         return self.neighbours
+    
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
     # adicionar uma conexao ao STATUS do servidor (monitorização da rede)
     def putConnectionServerStatus(self,neighbour,connection):
@@ -48,8 +85,20 @@ class database:
         else:
             self.serverStatus[neighbour] = connection
 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#        
+
+
+
     def getConnectionServerStatus(self,neighbour):
         return self.serverStatus[neighbour]
+    
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
     # obter uma stream
     def getStream(self,streamName):
@@ -58,6 +107,12 @@ class database:
             else: return False
         else:
             return False
+        
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
     # obter o estado de uma stream        
     def getStreamState(self,streamName):
@@ -65,11 +120,23 @@ class database:
                 return self.streamsDict[streamName]['state']
             else: return False
 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
     # alterar o estado de uma stream
     def changeStreamState(self,streamName,state):
             if(streamName in self.streamsDict.keys()):
                 self.streamsDict[streamName]['state'] = state
             else: return False
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
     
     # colocar uma stream como vazia (reiniciar para que volte ao ponto zero)
     def putStreamEmpty(self,streamName):
@@ -79,6 +146,12 @@ class database:
         dic['clients'] = {}
         self.streamsDict[streamName] = dic
 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
     # adicionar um receptor à stream (verifica-se se está ativa, sendo portanto possível adicionar) (receiver é um nodo)
     def addStreamReceiver(self,streamName,ip):
         try:
@@ -87,6 +160,12 @@ class database:
             else : return False
         except Exception: 
             return False
+        
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
     # remover um receptor da stream (receiver é um nodo)
     def removeStreamReceiver(self,streamName,ip):
@@ -99,6 +178,12 @@ class database:
 
         except Exception: 
             return False
+        
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
     
     # obter os receptores por stream (receiver é um nodo)
     def getStreamReceivers(self,streamName):
@@ -107,6 +192,12 @@ class database:
             
         except Exception: 
             return False
+        
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
     # adicionar um cliente para uma stream
     def addStreamClient(self,streamName,ip):
@@ -116,6 +207,12 @@ class database:
             else: return False
         except :
             return False
+        
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
     # remover um cliente de uma stream
     def removeStreamClient(self,streamName,ip):
@@ -127,10 +224,22 @@ class database:
             print('poped')
         except :
             return False
+        
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
     # obter os clientes por stream
     def getStreamClients(self,streamName):
         return self.streamsDict[streamName]['clients'].keys()
+    
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
     # adicionar um pacote da stream para o cliente
     def putStreamPacket(self,streamName,ip,packet):
@@ -141,12 +250,22 @@ class database:
             pass
         
 
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
     def popStreamPacket(self,streamName,ip):
         try:
                 return self.streamsDict[streamName]['clients'][ip].pop(0)
         except Exception:
             # traceback.print_exc()
             return None
+        
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 
 
     def checkLatencyWithPing(self, ip):
@@ -160,10 +279,17 @@ class database:
                     time = line.split("time=")[1].split(" ")[0]
                     return float(time)
                 
+
+                
         except subprocess.CalledProcessError:
             # Se o ping falhar
             print(f"Cant ping {ip}")
             return None
+        
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 
          
     # obter as melhores métricas para o STATUS (monitorização da rede), sendo o 1º caso de decisao o timestamp, e o 2º caso de decisao o numero de saltos
@@ -223,6 +349,11 @@ class database:
                 
             return neighbourAux
     
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
    
     # adicionar a rota para uma stream
     def putRouteStreamDict(self,filename,neighbour,metrics):
@@ -231,6 +362,11 @@ class database:
             else :
                 self.routeStreamDict[filename] = {}
                 self.routeStreamDict[filename][neighbour] = metrics
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 
 
     # calcular as melhores metricas para uma stream (1º timestamp, 2º jumps)
@@ -274,14 +410,23 @@ class database:
                 #print(neighbour,neighbourAux)
             
             return neighbourAux
-    
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
     def getNumberOfRouteStream(self,filename):
         if filename in self.routeStreamDict.keys():
             return len(self.routeStreamDict[filename].keys())
         else: return 0
                 
-            
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
     def getMetricsRouteStreamDict(self,filename, neighbour):
             return self.routeStreamDict[filename][neighbour]

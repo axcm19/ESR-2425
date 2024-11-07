@@ -11,6 +11,11 @@ import re
 import cv2
 import traceback
 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 #leitura do ficheiro de configuração da topologia
 def readConfigFile(topo):
     print('reading config file ..')
@@ -18,11 +23,18 @@ def readConfigFile(topo):
         data = json.load(json_file)
     return data
 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 #funçaõ responsável por establecer uma conexão
 def initializeConnectionsWorker(conn,address,database):
     
         database.addPeerConnected()
         data = conn.recv(1024).decode()
+
         if data:
             neighboursList = []
             #getting neighbours list
@@ -31,6 +43,7 @@ def initializeConnectionsWorker(conn,address,database):
                 if address[0] in value['names']:
                     print('sending neighbours to ' + key)
                     neighboursList = value['neighbours']
+
             #verifica se todos os nodos já se encontram conectados   
             print(f'PeersConnected = {database.getPeersConnected()}')
             print(f'NumberPeer = {database.getNumberPeer()}') 
@@ -40,6 +53,12 @@ def initializeConnectionsWorker(conn,address,database):
         conn.send(pickle.dumps(neighboursList))  # send data to the client
         print('finished sending neighbours to everyone')
         conn.close()  # close the connection
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
 #função responsável pelo establecimento de todas conexões
 def initializeConnections(database):
@@ -56,7 +75,13 @@ def initializeConnections(database):
     for i in range(nodesNumber):
         conn, address = server_socket.accept()  # accept new connection
         Thread(target=initializeConnectionsWorker, args = (conn,address,database)).start()
+
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
     
+
 
 #função responsável por monitorizar a rede overlay
 def sendStatusServerNetwork(database):
@@ -84,7 +109,12 @@ def sendStatusServerNetwork(database):
                     pass
         sleep(30)
 
-    
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 # receber um pedido de stream pelo worker e tratar o envio
 def receiveStreamRequestWorker(filename,address,database,udpSocket):
       
@@ -101,6 +131,7 @@ def receiveStreamRequestWorker(filename,address,database,udpSocket):
         success, data = file.read()
         
         while success:
+
             print(i)
             frame = cv2.imencode('.jpg', data, [cv2.IMWRITE_JPEG_QUALITY, 90])[1].tobytes() # leitura de uma frame
             udpSocket.sendto(frame, address) #envio de cada frame
@@ -109,7 +140,10 @@ def receiveStreamRequestWorker(filename,address,database,udpSocket):
             success, data = file.read()
             sleep(0.0005)
             
-            
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
             
 
 #função responsável por atender a pedidos de stream
@@ -137,6 +171,11 @@ def receiveStreamRequest(database):
                     database.changeStreamState(filename)
 
 
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 # Thread que vai receber as conexões dos clientes, por cada uma delas, vai criar uma thread para tratar da autenticação do cliente
 def clientConnectionsLoginReceive(database):
 
@@ -158,6 +197,12 @@ def clientConnectionsLoginReceive(database):
         print(f"Error in clientConnectionsLoginReceive: {e}")
     finally:
         server_socket.close()
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
 # Thread que vai responder as conexões dos clientes, por cada uma delas
 def clientConnectionsLoginSend(client_to_respond, port_to_receive, database):
@@ -194,7 +239,10 @@ def clientConnectionsLoginSend(client_to_respond, port_to_receive, database):
     print('Finished sending POPs to client')
     
     client_socket.close()
-       
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#       
 
                    
 

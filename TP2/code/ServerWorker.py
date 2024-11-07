@@ -7,6 +7,11 @@ from oNode import verifyStreamInNeighbourHood
 from oNode import getStream
 
 
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 class ServerWorker:
 	SETUP = 'SETUP'
 	PLAY = 'PLAY'
@@ -24,15 +29,31 @@ class ServerWorker:
 	clientInfo = {}
 	
 
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 	
-	def __init__(self, clientInfo,database):
+	def __init__(self, clientInfo,database, allClients_dict):
 		self.clientInfo = clientInfo
 		self.database = database
 		conn, adress = clientInfo['rtspSocket']
 		self.clientIp = adress[0]
+		self.allClients = allClients_dict
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 
 	def run(self):
 		threading.Thread(target=self.recvRtspRequest).start()
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
 
 
 	def getStreamLocation(self,filename):
@@ -55,6 +76,10 @@ class ServerWorker:
 
 
 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def recvRtspRequest(self):
 		"""Receive RTSP request from the client."""
 		self.connSocket = self.clientInfo['rtspSocket'][0]
@@ -63,9 +88,29 @@ class ServerWorker:
 		while True:
 			data = self.connSocket.recv(256)
 
+			#print("\nfunção recvRtspRequest em serverworker")
+			#print(f"data = {data}")
+
+
 			if data:
-				print("Data received:\n" + data.decode("utf-8"))
+
+				msg = data.decode("utf-8")
+				splitted = msg.split(' ')
+		
+				# Get the media file name
+				filename = splitted[1]
+
+				print("Data received:\n" + msg)
+
+				self.allClients[self.clientIp] = filename
+
+				print(f"clientes = {self.allClients}")
+
 				self.processRtspRequest(data.decode("utf-8"))
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
 	
@@ -149,10 +194,21 @@ class ServerWorker:
 			
 			# Close the RTP socket
 			self.clientInfo['rtpSocket'].close()
-			
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
+	# tentar passar o clientInfo de cada cliente que se liga	
 	def sendRtp(self):
 		"""Send RTP packets over UDP."""
+
 		while True:
+
+			#for ip in self.allClients: # ---> tentativa de colocar em sincronia
+
 			self.clientInfo['event'].wait(0.05) 
 			
 			# Stop sending if request is PAUSE or TEARDOWN
@@ -165,12 +221,21 @@ class ServerWorker:
 				try:
 					address = self.clientInfo['rtspSocket'][1][0]
 					port = int(self.clientInfo['rtpPort'])
+
+					#self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(ip,port))	# ---> tentativa de colocar em sincronia
 					self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(address,port))
+
 				except:
 					print("Connection Error")
 					#print('-'*60)
 					#traceback.print_exc(file=sys.stdout)
 					#print('-'*60)
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+				
 
 	def makeRtp(self, payload, frameNbr):
 		"""RTP-packetize the video data."""
@@ -189,6 +254,12 @@ class ServerWorker:
 		
 		return rtpPacket.getPacket()
 		
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
 	def replyRtsp(self, code, seq):
 		"""Send RTSP reply to the client."""
 		if code == self.OK_200:
