@@ -90,6 +90,7 @@ def sendStatusServerNetwork(database):
     myname = socket.gethostname()
     neighbours = database.getTopo()[myname]['neighbours']
     i = 0
+    
     while True:
 
         print('sending status')

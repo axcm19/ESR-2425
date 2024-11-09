@@ -123,7 +123,7 @@ class b_database:
     #alterar o estado de uma stream para desativado
     def changeStreamState(self,filename):
         self.streams[filename]['state'] = 'disabled'
-        print('disabled')
+        print(f'stream of {filename} is disabled')
 
     
     

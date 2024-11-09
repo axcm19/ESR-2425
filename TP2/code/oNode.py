@@ -70,10 +70,10 @@ def getStream(database,filename,comeFrom,server):
                 i = i + 1
                 try:
                         for receiver in database.getStreamReceivers(filename):          #separação para caso de oNodes
-                                # print(receiver)
+                                #print(f"new receiver = {receiver}")
                                 udpSocket.sendto(response,receiver)
                         for client in database.getStreamClients(filename):              # separação para caso de clientes
-                                # print(client)
+                                #print(f"new client = {client}")
                                 database.putStreamPacket(filename,client,response)
                 except:
                         pass
@@ -392,18 +392,20 @@ def receiveStatusServerNetwork(database):
 
 
 # obter a informação do cliente e começar o tratamento do pedido através do ServerWorker
-def server(database, port, allclients):
+def server(database, port):
         try:
                 SERVER_PORT = int(port)
                 print(f"server port = {SERVER_PORT}")
                 rtspSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 rtspSocket.bind(('', SERVER_PORT))
-                rtspSocket.listen(5)    
+                rtspSocket.listen(5)
+
+
                 # Receber a informação do cliente (address,port) através de uma RTSP/TCP session
                 while True:
                     clientInfo = {}
                     clientInfo['rtspSocket'] = rtspSocket.accept()
-                    ServerWorker.ServerWorker(clientInfo,database, allclients).run()
+                    ServerWorker.ServerWorker(clientInfo, database).run()
         
         except:
                 print("[Usage: Server.py Server_port]\n")
@@ -418,8 +420,6 @@ def server(database, port, allclients):
 # Thread que vai receber as conexões dos clientes, por cada uma delas, vai criar uma thread para tratar da comunicação
 def clientConnections(database):
 
-        allClients_dict = {} # dicionário onde vai guardar todos os clientes que se ligaram
-
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind(('', 2555))  
         server_socket.listen(10)        # 10 conexoes no maximo
@@ -429,9 +429,8 @@ def clientConnections(database):
                 port = conn.recv(1024).decode()
                 print(port, 'from ' + address[0])
 
-                allClients_dict[address[0]] = ""
 
-                Thread(target=server, args = (database,port, allClients_dict)).start()
+                Thread(target=server, args = (database,port)).start()
 
 
 

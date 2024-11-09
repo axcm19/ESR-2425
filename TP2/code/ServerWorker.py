@@ -27,6 +27,20 @@ class ServerWorker:
 	CON_ERR_500 = 2
 	
 	clientInfo = {}
+
+	"""
+	clientInfo é um dicionário que tem as chaves:
+
+		rtspSocket: Representa o socket RTSP do cliente, utilizado para receber requisições RTSP.
+		videoStream: Representa o fluxo de vídeo do cliente. É inicializado com um objeto VideoStream na fase SETUP.
+		session: Contém o ID da sessão RTSP, gerado aleatoriamente.
+		rtpPort: Especifica a porta RTP/UDP que o cliente usará para receber pacotes RTP.
+		rtpSocket: Representa o socket RTP do cliente, criado ao processar a requisição PLAY.
+		event: Um objeto threading.Event utilizado para controlar a transmissão dos pacotes RTP (interrompe a transmissão se estiver setado).
+		worker: Representa a thread responsável por enviar pacotes RTP.
+
+	Essas são todas as chaves da estrutura clientInfo conforme aparecem no código fornecido.
+	"""
 	
 
 
@@ -34,12 +48,11 @@ class ServerWorker:
 
 
 	
-	def __init__(self, clientInfo,database, allClients_dict):
+	def __init__(self, clientInfo,database):
 		self.clientInfo = clientInfo
 		self.database = database
 		conn, adress = clientInfo['rtspSocket']
 		self.clientIp = adress[0]
-		self.allClients = allClients_dict
 
 
 
@@ -101,10 +114,6 @@ class ServerWorker:
 				filename = splitted[1]
 
 				print("Data received:\n" + msg)
-
-				self.allClients[self.clientIp] = filename
-
-				print(f"clientes = {self.allClients}")
 
 				self.processRtspRequest(data.decode("utf-8"))
 
@@ -169,7 +178,7 @@ class ServerWorker:
 				
 				# Create a new thread and start sending RTP packets
 				self.clientInfo['event'] = threading.Event()
-				self.clientInfo['worker']= threading.Thread(target=self.sendRtp) 
+				self.clientInfo['worker']= threading.Thread(target=self.sendRtp,args=(filename,)) 
 				self.clientInfo['worker'].start()
 		
 		# Process PAUSE request
@@ -202,13 +211,13 @@ class ServerWorker:
 
 
 	# tentar passar o clientInfo de cada cliente que se liga	
-	def sendRtp(self):
+	def sendRtp(self, filename):
 		"""Send RTP packets over UDP."""
 
 		while True:
 
-			#for ip in self.allClients: # ---> tentativa de colocar em sincronia
-
+			
+			# --- versão original ---
 			self.clientInfo['event'].wait(0.05) 
 			
 			# Stop sending if request is PAUSE or TEARDOWN
@@ -216,20 +225,23 @@ class ServerWorker:
 				break 
 				
 			data = self.clientInfo['videoStream'].nextFrame()
-			if data: 
-				frameNumber = self.clientInfo['videoStream'].frameNbr()
-				try:
-					address = self.clientInfo['rtspSocket'][1][0]
-					port = int(self.clientInfo['rtpPort'])
 
-					#self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(ip,port))	# ---> tentativa de colocar em sincronia
-					self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(address,port))
+			for client in self.database.getStreamClients(filename):	# ---> versão de sicronização
 
-				except:
-					print("Connection Error")
-					#print('-'*60)
-					#traceback.print_exc(file=sys.stdout)
-					#print('-'*60)
+				if data: 
+					frameNumber = self.clientInfo['videoStream'].frameNbr()
+					try:
+						# address = self.clientInfo['rtspSocket'][1][0]	# ---> versão original
+						port = int(self.clientInfo['rtpPort'])
+
+						#self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(address,port))	# ---> versão original
+						self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(client,port))	# ---> versão de sicronização
+
+					except:
+						print("Connection Error")
+						#print('-'*60)
+						#traceback.print_exc(file=sys.stdout)
+						#print('-'*60)
 
 
 

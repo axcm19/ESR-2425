@@ -17,6 +17,28 @@ class database:
     routeStreamDict : dict #metrics of streams in neighbourhood
 
 
+
+    """
+    Dicionários e respetivas chaves:
+
+    1. serverStatus (dicionário que monitora o status de servidores vizinhos)
+        servername: nome do servidor.
+        timestamp: tempo de resposta ou tempo de medição.
+        jumps: número de saltos para o servidor.
+
+    2. streamsDict (dicionário que armazena informações sobre as streams)
+        state: estado da stream (e.g., 'activated' ou 'disabled').
+        receivers: lista de receptores da stream (nodos).
+        clients: dicionário de clientes conectados a essa stream, onde cada chave representa o IP do cliente e o valor é uma lista de pacotes.
+
+    3. routeStreamDict (dicionário que guarda as rotas para as streams)
+        Cada filename possui um dicionário de neighbour como chave, com os seguintes dados para cada vizinho:
+        timestamp: tempo de resposta ou tempo de medição.
+        jumps: número de saltos para o vizinho que tem a rota.
+
+    """
+
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
@@ -174,7 +196,7 @@ class database:
 
             if len(self.streamsDict[streamName]['receivers']) == 0 and len(self.streamsDict[streamName]['clients'].keys()) == 0:
                 self.streamsDict[streamName]['state'] = 'disabled'
-                print(self.streamsDict[streamName]['state'])
+                print(f"stream of {streamName} is {self.streamsDict[streamName]['state']}")
 
         except Exception: 
             return False
@@ -201,9 +223,11 @@ class database:
 
     # adicionar um cliente para uma stream
     def addStreamClient(self,streamName,ip):
+
         try:
             if self.streamsDict[streamName]['state'] == 'activated':
                 self.streamsDict[streamName]['clients'][ip] = []
+
             else: return False
         except :
             return False
