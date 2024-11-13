@@ -4,10 +4,15 @@ import socket
 import subprocess
 from threading import Thread
 import sys
-import time
+#import time
+from time import sleep
 from Cliente import Client
 from tkinter import Tk
 import random
+
+
+
+popToConect = "" # wich pop it will conect to based on the filename
 
 
 
@@ -56,7 +61,61 @@ def checkLatencyWithPing(ip):
         # Se o ping falhar
         print(f"Cant ping {ip}")
         return None
+    
 
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
+def checkIfStreamingMyMovieSend(host_to_connect, filename):
+    
+    try:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((host_to_connect, 4666))  # Connect to the server
+
+        port_to_receive = random.randint(8000, 9000) 
+        print(f"Asking if POP {host_to_connect} has the movie {filename} on port = {port_to_receive}")
+
+        pedido = str(port_to_receive) + "," + filename
+
+        client_socket.send(str(pedido).encode())  # Send port to server
+
+        client_socket.close()  # Close the client socket after sending port
+        Thread(target=checkIfStreamingMyMovieReceive, args=(port_to_receive,)).start()
+    
+    except Exception as e:
+        print(f"Error in checkIfStreamingMyMovieSend: {e}")
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
+def checkIfStreamingMyMovieReceive(port_to_receive):
+
+    global popToConect
+    
+    port =  int(port_to_receive)
+
+    new_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    new_socket.bind(('', port))  
+    new_socket.listen(1)  # Aceita apenas uma conexão
+
+    conn, address = new_socket.accept()  # Aceitar nova conexão
+
+    resposta = conn.recv(1024).decode('utf-8')  # Recebe a lista de POPs
+
+
+    if(resposta == "yes"):
+        popToConect = address[0]
+        conn.close()
+
+    else:
+        conn.close()
+        return
+        
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -86,6 +145,8 @@ def loginSend(host_to_connect, filename):
 
 
 def loginReceive(filename, port_to_receive):
+
+    global popToConect
     
     port =  int(port_to_receive)
 
@@ -107,10 +168,12 @@ def loginReceive(filename, port_to_receive):
 
     conn.close()
 
+
     # Escolhe um POP aleatório
     #random_index = random.randint(0, len(popsParsed) - 1)
     #mypop = popsParsed[random_index]
 
+    """
 
     # Escolhe um POP com base no tempo de resposta do ping
     times = {}
@@ -127,10 +190,40 @@ def loginReceive(filename, port_to_receive):
     
     # Verifica qual IP tem o menor tempo
     mypop = min(times, key=times.get)
-    
-    print(f"Connecting to POP at port {mypop}")
 
-    Thread(target=send, args=(mypop, filename)).start()
+    """
+
+    # tenta encontrar um pop a transmitir
+    print(f"Trying to find a pop that is already streaming {filename}")
+    for ip in popsParsed:
+        checkIfStreamingMyMovieSend(ip, filename)
+        sleep(3)
+
+
+    # se não encontrar um pop a transmitir
+    print("Choosing a pop with ping")
+    if(popToConect == ""):
+        # Escolhe um POP com base no tempo de resposta do ping
+        times = {}
+
+        for ip in popsParsed:
+            time = checkLatencyWithPing(ip)
+
+            if time is not None:
+                times[ip] = time
+                print(f"IP: {ip}, response time: {time} ms")
+
+            else:
+                print(f"IP: {ip}, did not respond")
+        
+        # Verifica qual IP tem o menor tempo
+        mypop = min(times, key=times.get)
+        popToConect = mypop 
+
+    print(f"Connecting to POP {popToConect}")
+
+    #Thread(target=send, args=(mypop, filename)).start()
+    Thread(target=send, args=(popToConect, filename)).start()
 
 
 

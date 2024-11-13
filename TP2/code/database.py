@@ -265,6 +265,20 @@ class database:
 
 
 
+    # verificar se uma stream de um ficheiro já existe
+    def checkIfStream(self,streamName):
+
+        if(streamName in self.streamsDict.keys()):
+             return True
+        else:
+            return False
+    
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
     # adicionar um pacote da stream para o cliente
     def putStreamPacket(self,streamName,ip,packet):
         

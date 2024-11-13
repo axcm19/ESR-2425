@@ -68,6 +68,10 @@ def getStream(database,filename,comeFrom,server):
                 # print(i)
                 response,adress = udpSocket.recvfrom(100000)
                 i = i + 1
+
+                #print(f"Node Receivers = {database.getStreamReceivers(filename)}")
+                #print(f"Client Receivers = {database.getStreamClients(filename)}")
+
                 try:
                         for receiver in database.getStreamReceivers(filename):          #separação para caso de oNodes
                                 #print(f"new receiver = {receiver}")
@@ -437,6 +441,78 @@ def clientConnections(database):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
+
+# Thread que vai receber as conexões dos clientes, por cada uma delas, vai criar uma thread para tratar da resposta do cliente
+def checkIfStreamingMyMovieReceive(database):
+
+    try:
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.bind(('', 4666))
+        server_socket.listen(socket.SOMAXCONN)  # determinar automaticamente um valor máximo razoável de connections
+
+        while True:
+            conn, address = server_socket.accept()
+            portAndFilename = conn.recv(1024).decode('utf-8')
+            porta, filename = portAndFilename.split(',')
+
+
+            print(f"Client {address[0]} is asking for {filename}")
+
+            resposta = ""
+            test = database.checkIfStream(filename)
+
+            if(test == True):
+                   resposta = "yes"
+                   conn.close()
+
+            else:
+                   resposta = "no"
+                   conn.close()
+                   
+
+            # Start a thread to handle each client connection with the provided port and answer
+            Thread(target=checkIfStreamingMyMovieSend, args=(address[0], int(porta), resposta)).start()
+    
+    except Exception as e:
+        print(f"Error in checkIfStreamingMyMovieReceive: {e}")
+    finally:
+        server_socket.close()
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
+# Thread que vai responder as conexões dos clientes para verificação de stream
+def checkIfStreamingMyMovieSend(client_to_respond, port_to_receive, resposta):
+
+        
+    for attempt in range(3):
+        port = int(port_to_receive)
+        try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)# Set up the client socket
+            client_socket.connect((client_to_respond, port))  # Connect to the specified client
+            print(f"Responding to client at {client_to_respond}:{port}")
+            break
+        except ConnectionRefusedError:
+            print(f"Attempt {attempt + 1}: Connection refused, retrying...")
+            time.sleep(1)
+    else:
+        print("Failed to connect to client after multiple attempts.")
+        return
+
+    # Send the response to the client
+    client_socket.send(str(resposta).encode())
+    print('Finished sending response to client')
+    
+    client_socket.close()
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
 if __name__ == '__main__':
 
         # python3 oNode.py -s topologias/topo_overlay.json 1
@@ -468,6 +544,7 @@ if __name__ == '__main__':
                         database = database.database()          # construtor da database associada ao onode, que vai guardar as informações e métricas do nodo relativamente à sua vizinhança
                         bootstrapper = sys.argv[2]              # endereço do bootstrapper que vai permitir conhecer a topologia
                         Thread(target=neighboursRequest, args = (bootstrapper,database)).start()
+                        Thread(target=checkIfStreamingMyMovieReceive, args = (database,)).start()
                         Thread(target=clientConnections, args = (database,)).start()
                         Thread(target=receiveStreamVerification, args = (database,)).start()
                         Thread(target=receiveStreamRequest, args = (database,)).start() 

@@ -19,7 +19,7 @@ node n2 {
     type router
     model PC
     network-config {
-	hostname n19
+	hostname c4
 	!
 	interface eth0
 	 ip address 10.0.0.21/24
@@ -36,7 +36,7 @@ node n3 {
     type router
     model PC
     network-config {
-	hostname n20
+	hostname c3
 	!
 	interface eth0
 	 ip address 10.0.1.20/24
@@ -44,8 +44,8 @@ node n3 {
 	!
     }
     canvas c1
-    iconcoords {49.0 378.0}
-    labelcoords {49.0 410.0}
+    iconcoords {49.0 377.0}
+    labelcoords {49.0 409.0}
     interface-peer {eth0 n6}
 }
 
@@ -872,6 +872,28 @@ annotation a10 {
     iconcoords {793.0 584.0}
     type text
     label {O7}
+    labelcolor #d801f1
+    fontfamily {Arial}
+    fontsize {20}
+    effects {bold}
+    canvas c1
+}
+
+annotation a18 {
+    iconcoords {31.0 413.0}
+    type text
+    label {C3}
+    labelcolor #d801f1
+    fontfamily {Arial}
+    fontsize 20
+    effects {bold}
+    canvas c1
+}
+
+annotation a19 {
+    iconcoords {38.0 268.0}
+    type text
+    label {C4}
     labelcolor #d801f1
     fontfamily {Arial}
     fontsize 20
