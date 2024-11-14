@@ -226,22 +226,22 @@ class ServerWorker:
 				
 			data = self.clientInfo['videoStream'].nextFrame()
 
-			for client in self.database.getStreamClients(filename):	# ---> versão de sicronização
+			#for client in self.database.getStreamClients(filename):	# ---> versão de sicronização
 
-				if data: 
-					frameNumber = self.clientInfo['videoStream'].frameNbr()
-					try:
-						# address = self.clientInfo['rtspSocket'][1][0]	# ---> versão original
-						port = int(self.clientInfo['rtpPort'])
+			if data: 
+				frameNumber = self.clientInfo['videoStream'].frameNbr()
+				try:
+					address = self.clientInfo['rtspSocket'][1][0]	# ---> versão original
+					port = int(self.clientInfo['rtpPort'])
 
-						#self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(address,port))	# ---> versão original
-						self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(client,port))	# ---> versão de sicronização
+					self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(address,port))	# ---> versão original
+					#self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(client,port))	# ---> versão de sicronização
 
-					except:
-						print("Connection Error")
-						#print('-'*60)
-						#traceback.print_exc(file=sys.stdout)
-						#print('-'*60)
+				except:
+					print("Connection Error")
+					#print('-'*60)
+					#traceback.print_exc(file=sys.stdout)
+					#print('-'*60)
 
 
 

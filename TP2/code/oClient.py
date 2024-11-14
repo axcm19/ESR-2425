@@ -194,15 +194,18 @@ def loginReceive(filename, port_to_receive):
     """
 
     # tenta encontrar um pop a transmitir
+    """
     print(f"Trying to find a pop that is already streaming {filename}")
     for ip in popsParsed:
         checkIfStreamingMyMovieSend(ip, filename)
         sleep(3)
+    """
 
 
     # se não encontrar um pop a transmitir
-    print("Choosing a pop with ping")
+    #print("Choosing a pop with ping")
     if(popToConect == ""):
+        print("Choosing a pop with ping")
         # Escolhe um POP com base no tempo de resposta do ping
         times = {}
 
