@@ -212,36 +212,50 @@ class ServerWorker:
 
 	# tentar passar o clientInfo de cada cliente que se liga	
 	def sendRtp(self, filename):
-		"""Send RTP packets over UDP."""
-
+		"""Send RTP packets over UDP to multiple clients and PoPs."""
+		
 		while True:
-
+			# Esperar até que o evento seja definido (0.05s)
+			self.clientInfo['event'].wait(0.05)
 			
-			# --- versão original ---
-			self.clientInfo['event'].wait(0.05) 
+			# Parar de enviar se o estado for PAUSE ou TEARDOWN
+			if self.clientInfo['event'].isSet():
+				break
 			
-			# Stop sending if request is PAUSE or TEARDOWN
-			if self.clientInfo['event'].isSet(): 
-				break 
-				
+			# Obter o próximo frame de vídeo
 			data = self.clientInfo['videoStream'].nextFrame()
-
-			#for client in self.database.getStreamClients(filename):	# ---> versão de sicronização
-
-			if data: 
+			
+			if data:
 				frameNumber = self.clientInfo['videoStream'].frameNbr()
+				
 				try:
-					address = self.clientInfo['rtspSocket'][1][0]	# ---> versão original
-					port = int(self.clientInfo['rtpPort'])
+					# Criar o pacote RTP
+					rtpPacket = self.makeRtp(data, frameNumber)
+					
+					# Obter a lista de clientes para a stream atual
+					clients = self.database.getStreamClients(filename)
+					
+					# Obter a lista de PoPs (nós intermediários)
+					receivers = self.database.getStreamReceivers(filename)
 
-					self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(address,port))	# ---> versão original
-					#self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(client,port))	# ---> versão de sicronização
+					# Enviar o pacote para cada cliente individualmente
+					for client in clients:
+						address = client
+						port = int(self.clientInfo['rtpPort'])
+						self.clientInfo['rtpSocket'].sendto(rtpPacket, (address, port))
+					
+					# Enviar o pacote para cada PoP (nós intermediários)
+					if receivers:
+						for receiver in receivers:
+							port = 6666  # Assumindo que os PoPs estão a ouvir na porta 6666
+							self.clientInfo['rtpSocket'].sendto(rtpPacket, (receiver, port))
+					
+					# Armazenar o pacote para possível retransmissão ou buffer
+					for client in clients:
+						self.database.putStreamPacket(filename, client, rtpPacket)
 
-				except:
-					print("Connection Error")
-					#print('-'*60)
-					#traceback.print_exc(file=sys.stdout)
-					#print('-'*60)
+				except Exception as e:
+					print(f"Connection Error: {e}")
 
 
 
@@ -256,14 +270,17 @@ class ServerWorker:
 		extension = 0
 		cc = 0
 		marker = 0
-		pt = 26 # MJPEG type
+		pt = 26  # MJPEG type
 		seqnum = frameNbr
-		ssrc = 0 
+		ssrc = 12345  # Identificador fixo para este stream
 		
+		# Criar uma instância do pacote RTP
 		rtpPacket = RtpPacket()
 		
+		# Codificar o cabeçalho RTP
 		rtpPacket.encode(version, padding, extension, cc, seqnum, marker, pt, ssrc, payload)
 		
+		# Retornar o pacote RTP completo
 		return rtpPacket.getPacket()
 		
 
