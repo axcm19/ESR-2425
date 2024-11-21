@@ -76,9 +76,18 @@ def getStream(database,filename,comeFrom,server):
                         for receiver in database.getStreamReceivers(filename):          #separação para caso de oNodes
                                 #print(f"new receiver = {receiver}")
                                 udpSocket.sendto(response,receiver)
+
+
+                        # se tiver clientes
+                        if (len(database.getStreamClients(filename)) > 0):
+                                database.putStreamPacket_FORALL(filename, response)
+
+                        """
                         for client in database.getStreamClients(filename):              # separação para caso de clientes
                                 #print(f"new client = {client}")
+
                                 database.putStreamPacket(filename,client,response)
+                        """
                 except:
                         pass
         

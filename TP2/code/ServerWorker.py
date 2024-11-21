@@ -231,10 +231,13 @@ class ServerWorker:
 			if data: 
 				frameNumber = self.clientInfo['videoStream'].frameNbr()
 				try:
+
+					rtpPacket = self.makeRtp(data, frameNumber)
+
 					address = self.clientInfo['rtspSocket'][1][0]	# ---> versão original
 					port = int(self.clientInfo['rtpPort'])
 
-					self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(address,port))	# ---> versão original
+					self.clientInfo['rtpSocket'].sendto(rtpPacket,(address,port))	# ---> versão original
 					#self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(client,port))	# ---> versão de sicronização
 
 				except:

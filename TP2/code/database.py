@@ -30,6 +30,7 @@ class database:
         state: estado da stream (e.g., 'activated' ou 'disabled').
         receivers: lista de receptores da stream (nodos).
         clients: dicionário de clientes conectados a essa stream, onde cada chave representa o IP do cliente e o valor é uma lista de pacotes.
+        currentpacket: lista do pacote atual da stream no POP (no fundo um buffer de pacotes do POP)
 
     3. routeStreamDict (dicionário que guarda as rotas para as streams)
         Cada filename possui um dicionário de neighbour como chave, com os seguintes dados para cada vizinho:
@@ -227,6 +228,7 @@ class database:
         try:
             if self.streamsDict[streamName]['state'] == 'activated':
                 self.streamsDict[streamName]['clients'][ip] = []
+                self.streamsDict[streamName]['currentpacket'] = []
 
             else: return False
         except :
@@ -272,6 +274,36 @@ class database:
              return True
         else:
             return False
+        
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
+    # adicionar um pacote da stream ao buffer geral do POP, assim todos os cliente daquele POP acedem ao mesmo pacote
+    def putStreamPacket_FORALL(self,streamName,packet):
+        
+        try:
+            # Adiciona o pacote à lista do stream
+            self.streamsDict[streamName]['currentpacket'].append(packet)
+
+        except:
+            pass
+        
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
+    def popStreamPacket_FORALL(self,streamName):
+        try:
+            return self.streamsDict[streamName]['currentpacket'].pop(0)
+                
+               
+        except Exception:
+            # traceback.print_exc()
+            return None
     
 
 

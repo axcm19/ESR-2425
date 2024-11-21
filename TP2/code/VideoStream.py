@@ -36,7 +36,8 @@ class VideoStream:
 
 	def nextFrame(self):
 		
-		nextframe = self.database.popStreamPacket(self.filename,self.clientIp)
+		#nextframe = self.database.popStreamPacket(self.filename,self.clientIp)
+		nextframe = self.database.popStreamPacket_FORALL(self.filename)
 		self.frameNum += 1
 		
 		return nextframe
