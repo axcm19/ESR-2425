@@ -133,13 +133,13 @@ def receiveStreamRequestWorker(filename,address,database,udpSocket):
         
         while success:
 
-            print(i)
+            #print(i)
             frame = cv2.imencode('.jpg', data, [cv2.IMWRITE_JPEG_QUALITY, 90])[1].tobytes() # leitura de uma frame
             udpSocket.sendto(frame, address) #envio de cada frame
             if database.getStreamState(filename) != 'activated' : break
             i += 1
             success, data = file.read()
-            sleep(0.0005)
+            sleep(0.05)
             
 
 
