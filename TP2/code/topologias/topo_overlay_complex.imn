@@ -299,10 +299,6 @@ node n14 {
     network-config {
 	hostname o4
 	!
-	interface eth5
-	 ip address 10.0.27.1/24
-	 ipv6 address 2001:27::1/64
-	!
 	interface eth4
 	 ip address 10.0.26.1/24
 	 ipv6 address 2001:26::1/64
@@ -332,7 +328,6 @@ node n14 {
     interface-peer {eth2 n15}
     interface-peer {eth3 n18}
     interface-peer {eth4 n17}
-    interface-peer {eth5 n22}
 }
 
 node n15 {
@@ -355,8 +350,8 @@ node n15 {
 	!
     }
     canvas c1
-    iconcoords {1034.0 303.0}
-    labelcoords {1034.0 335.0}
+    iconcoords {1034.0 299.0}
+    labelcoords {1034.0 331.0}
     interface-peer {eth0 n12}
     interface-peer {eth1 n14}
     interface-peer {eth2 n17}
@@ -435,7 +430,11 @@ node n18 {
     type router
     model router
     network-config {
-	hostname n4
+	hostname o8
+	!
+	interface eth2
+	 ip address 10.0.27.1/24
+	 ipv6 address 2001:27::1/64
 	!
 	interface eth1
 	 ip address 10.0.22.1/24
@@ -447,17 +446,18 @@ node n18 {
 	!
     }
     canvas c1
-    iconcoords {1289.0 94.0}
-    labelcoords {1289.0 126.0}
+    iconcoords {1288.0 164.0}
+    labelcoords {1288.0 196.0}
     interface-peer {eth0 n19}
     interface-peer {eth1 n14}
+    interface-peer {eth2 n22}
 }
 
 node n19 {
     type router
     model router
     network-config {
-	hostname n2
+	hostname o9
 	!
 	interface eth3
 	 ip address 10.0.24.1/24
@@ -477,8 +477,8 @@ node n19 {
 	!
     }
     canvas c1
-    iconcoords {1544.0 161.0}
-    labelcoords {1544.0 193.0}
+    iconcoords {1544.0 160.0}
+    labelcoords {1544.0 192.0}
     interface-peer {eth0 n18}
     interface-peer {eth1 n17}
     interface-peer {eth2 n20}
@@ -551,9 +551,9 @@ node n22 {
 	!
     }
     canvas c1
-    iconcoords {1031.0 24.0}
-    labelcoords {1031.0 56.0}
-    interface-peer {eth0 n14}
+    iconcoords {1290.0 49.0}
+    labelcoords {1290.0 81.0}
+    interface-peer {eth0 n18}
 }
 
 link l1 {
@@ -686,26 +686,31 @@ link l24 {
 }
 
 link l25 {
+    color Magenta
     nodes {n18 n19}
     bandwidth 0
 }
 
 link l26 {
+    color Magenta
     nodes {n19 n17}
     bandwidth 0
 }
 
 link l27 {
+    color Magenta
     nodes {n18 n14}
     bandwidth 0
 }
 
 link l28 {
+    color Magenta
     nodes {n19 n20}
     bandwidth 0
 }
 
 link l29 {
+    color Magenta
     nodes {n19 n21}
     bandwidth 0
 }
@@ -717,16 +722,17 @@ link l30 {
 }
 
 link l31 {
+    delay {{} 90000}
     color Magenta
     nodes {n14 n17}
-    bandwidth 0
+    bandwidth {0 {}}
 }
 
 link l32 {
     color Magenta
-    delay 65000
-    nodes {n22 n14}
-    bandwidth 0
+    delay {{} 90000}
+    nodes {n18 n22}
+    bandwidth {0 {}}
 }
 
 annotation a1 {
@@ -755,7 +761,7 @@ annotation a3 {
 }
 
 annotation a4 {
-    iconcoords {701 4 1807 610}
+    iconcoords {696 0 1806 610}
     type rectangle
     label {Rede CDN}
     labelcolor black
@@ -783,7 +789,7 @@ annotation a5 {
 }
 
 annotation a6 {
-    iconcoords {726 25 898 585}
+    iconcoords {721 21 897 585}
     type rectangle
     label {Points of Presence}
     labelcolor black
@@ -830,7 +836,7 @@ annotation a9 {
 }
 
 annotation a11 {
-    iconcoords {1011.0 139.0}
+    iconcoords {1016.0 214.0}
     type text
     label {O4}
     labelcolor #d801f1
@@ -935,12 +941,34 @@ annotation a19 {
 }
 
 annotation a20 {
-    iconcoords {1045.0 28.0}
+    iconcoords {1271.0 203.0}
+    type text
+    label {O8}
+    labelcolor #d801f1
+    fontfamily {Arial}
+    fontsize {20}
+    effects {bold}
+    canvas c1
+}
+
+annotation a21 {
+    iconcoords {1526.0 124.0}
+    type text
+    label {O9}
+    labelcolor #d801f1
+    fontfamily {Arial}
+    fontsize {20}
+    effects {bold}
+    canvas c1
+}
+
+annotation a22 {
+    iconcoords {1308.0 44.0}
     type text
     label {S2}
     labelcolor #d801f1
     fontfamily {Arial}
-    fontsize 20
+    fontsize {20}
     effects {bold}
     canvas c1
 }
