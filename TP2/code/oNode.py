@@ -110,7 +110,7 @@ def receiveStreamRequest(database):
 
                 msg , address = udpSocket.recvfrom(100000)
 
-                print(address)
+                #print(address)
 
                 request = msg.decode()
 

@@ -21,7 +21,7 @@ popToConect = "" # wich pop it will conect to based on the filename
 
 
 def send(host_to_connect,filename):
-        print(host_to_connect)
+        #print(host_to_connect)
         client_socket = socket.socket()  # instanciar
         client_socket.connect((host_to_connect, 2555 ))  # conectar ao nodo (oNode mais proximo)
         port = random.randint(4000, 5000)               # escolha da porta (reservou-se o intervalo 4000-5000)
@@ -201,7 +201,48 @@ def loginReceive(filename, port_to_receive):
         sleep(3)
     """
 
+    if popToConect == "":
+        print("\nChoosing a POP with ping")
 
+        # Dicionário para armazenar os tempos
+        times = {}
+        server_ips = ["10.0.25.10", "10.0.27.10"]  # List of servers
+
+        for pop_ip in popsParsed:
+            for server_ip in server_ips:
+                # Latência do cliente para o POP
+                time_to_pop = checkLatencyWithPing(pop_ip)
+
+                if time_to_pop is not None:
+                    # Latência do POP para o servidor
+                    time_to_server = checkLatencyWithPing(server_ip)
+
+                    if time_to_server is not None:
+                        # Soma das latências para o servidor específico
+                        total_time = time_to_pop + time_to_server
+                        times[(pop_ip, server_ip)] = total_time
+
+                        print(f"POP: {pop_ip}, time to POP: {time_to_pop} ms, time to Server {server_ip}: {time_to_server} ms")
+                        print(f"Total time for POP {pop_ip}, Server {server_ip}: {total_time:.3f} ms")
+                    else:
+                        print(f"POP: {pop_ip}, time to Server {server_ip}: did not respond")
+                else:
+                    print(f"POP: {pop_ip}, time to POP: did not respond")
+
+        # Verifica qual POP e servidor tem o menor tempo total
+        if times:
+            best_pop_server = min(times, key=times.get)
+            best_pop, best_server = best_pop_server
+            print(f"\nBest connection is to POP {best_pop}, Server {best_server} with time {times[best_pop_server]:.3f} ms")
+            popToConect = best_pop 
+
+            print(f"Connecting to POP {popToConect}")
+        else:
+            print("No POPs responded. Unable to connect.")
+
+
+
+    """
     # se não encontrar um pop a transmitir
     #print("Choosing a pop with ping")
     if(popToConect == ""):
@@ -224,6 +265,7 @@ def loginReceive(filename, port_to_receive):
         popToConect = mypop 
 
     print(f"Connecting to POP {popToConect}")
+    """
 
     #Thread(target=send, args=(mypop, filename)).start()
     Thread(target=send, args=(popToConect, filename)).start()
