@@ -5,7 +5,7 @@
 cd /home/core/Desktop/ESR-2425/TP2/code
 
 boot_ip="10.0.25.10"
-topologia="topologias/topo_overlay.json"
+topologia="topologias/topo_overlay_complex.json"
 
 # Verifique o nome do nó para decidir o comando específico
 case $1 in

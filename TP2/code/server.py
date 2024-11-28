@@ -230,8 +230,6 @@ def clientConnectionsLoginSend(client_to_respond, port_to_receive, database):
     # Retrieve all nodes from the database
     allNodes = database.getTopo()
     popsList = []
-    serverList = []
-
 
     # Collect all points of presence (POP) IPs from the nodes, excluding server nodes
     for n in allNodes:
@@ -239,25 +237,12 @@ def clientConnectionsLoginSend(client_to_respond, port_to_receive, database):
             if allNodes[n].get('pop'):  # Check if 'pop' key exists and is not empty
                 popsList.extend(allNodes[n]['pop'])  # Add all IPs in 'pop' to popsList
 
-
-    # Collect all servers IPs from the nodes, excluding else
-    for n in allNodes:
-        if "s" in n:  # Assuming "s" denotes server nodes
-            serverList.extend(allNodes[n]['names'])  # Add all IPs in 'pop' to popsList
-
-
     print(f"List of points of presence available = {popsList}")
-    print(f"List of servers available = {serverList}")
-
-    data_to_send = {
-        "popsList": popsList,
-        "serverList": serverList
-    }
 
     # Send the list of POPs to the client
-    #client_socket.send(pickle.dumps(popsList))
-    client_socket.send(pickle.dumps(data_to_send))
-    print('Finished sending POPs and servers to client')
+    client_socket.send(pickle.dumps(popsList))
+
+    print('Finished sending POPs to client')
     
     client_socket.close()
 

@@ -56,7 +56,6 @@ def getStream(database,filename,comeFrom,server):
         else :
                 msg       = f'{filename} 0'
         
-        #print(bestNeighbour)
         
         # uso de UDP para enviar o request da stream
         udpSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -69,9 +68,6 @@ def getStream(database,filename,comeFrom,server):
                 response,adress = udpSocket.recvfrom(100000)
                 i = i + 1
 
-                #print(f"Node Receivers = {database.getStreamReceivers(filename)}")
-                #print(f"Client Receivers = {database.getStreamClients(filename)}")
-
                 try:
                         for receiver in database.getStreamReceivers(filename):          #separação para caso de oNodes
                                 #print(f"new receiver = {receiver}")
@@ -82,12 +78,6 @@ def getStream(database,filename,comeFrom,server):
                         if (len(database.getStreamClients(filename)) > 0):
                                 database.putStreamPacket_FORALL(filename, response)
 
-                        """
-                        for client in database.getStreamClients(filename):              # separação para caso de clientes
-                                #print(f"new client = {client}")
-
-                                database.putStreamPacket(filename,client,response)
-                        """
                 except:
                         pass
         
@@ -330,9 +320,10 @@ def receiveStatusServerNetwork(database):
 
         while True: 
                 conn, address = status_socket.accept()
-                # print('received from ',address[0],flush=True)
+                
+                #print('received from ',address[0],flush=True)
                 data = conn.recv(1024)
-                # print(data.decode(),flush=True)
+                #print(data.decode(),flush=True)
 
                 msg = data.decode()
 
@@ -371,6 +362,7 @@ def receiveStatusServerNetwork(database):
                                 else:
                                         visited = visited + ',' + vis
                                 index = index + 1
+
                         for name in mynames:
                                 visited = visited + ',' + name
                                 

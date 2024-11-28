@@ -94,19 +94,52 @@ class database:
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
-
+    """
     # adicionar uma conexao ao STATUS do servidor (monitorização da rede)
     def putConnectionServerStatus(self,neighbour,connection):
 
         if neighbour in  self.serverStatus.keys():
+
             if self.serverStatus[neighbour]['servername'] != connection['servername']:
-                if abs(self.serverStatus[neighbour]['timestamp'] - connection['timestamp']) < 0.1 * min(self.serverStatus[neighbour]['timestamp'],connection['timestamp']):
+
+                if abs(self.serverStatus[neighbour]['timestamp'] - connection['timestamp']) < 0.1 * min(self.serverStatus[neighbour]['timestamp'],connection['timestamp']):  
+                              
                         if (self.serverStatus[neighbour]['jumps'] > connection['jumps']):
-                            self.serverStatus[neighbour] = connection          
+                            self.serverStatus[neighbour] = connection   
+
+
                 elif self.serverStatus[neighbour]['timestamp'] > connection['timestamp']:
-                    self.serverStatus[neighbour] = connection 
+                    self.serverStatus[neighbour] = connection
+
+                 
         else:
             self.serverStatus[neighbour] = connection
+    """
+
+
+    def putConnectionServerStatus(self, neighbour, connection):
+   
+        # caso o vizinho não esteja ainda no dicionário server status
+        if neighbour not in self.serverStatus:
+            self.serverStatus[neighbour] = connection
+            return
+
+        current_status = self.serverStatus[neighbour]
+        
+        # Se o 'servername' for diferente, verifica o timestamp
+        if current_status['servername'] != connection['servername']:
+
+            time_diff = abs(current_status['timestamp'] - connection['timestamp'])
+            min_time = min(current_status['timestamp'], connection['timestamp'])
+
+            # Caso o timestamp da connection seja mais pequeno que o atual, então atualiza o status atual
+            if current_status['timestamp'] > connection['timestamp']:
+                self.serverStatus[neighbour] = connection
+
+            # se os timestamps forem muito proximos e os saltos da connection forem menores que o atual, atualiza o atual 
+            elif time_diff < 0.1 * min_time and current_status['jumps'] > connection['jumps']:
+                self.serverStatus[neighbour] = connection
+
 
 
 
@@ -337,86 +370,44 @@ class database:
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
-
-    def checkLatencyWithPing(self, ip):
-        # Executa o comando ping e captura a saída
-        try:
-            output = subprocess.check_output(["ping", "-c", "1", ip], universal_newlines=True)
-            
-            # Procura pelo tempo de resposta na saída
-            for line in output.splitlines():
-                if "time=" in line:
-                    time = line.split("time=")[1].split(" ")[0]
-                    return float(time)
-                
-
-                
-        except subprocess.CalledProcessError:
-            # Se o ping falhar
-            print(f"Cant ping {ip}")
-            return None
-        
-
-
-#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-
-
-         
+    
     # obter as melhores métricas para o STATUS (monitorização da rede), sendo o 1º caso de decisao o timestamp, e o 2º caso de decisao o numero de saltos
     # usado apenas quando uma única stream decorre na rede
-    def getBestMetricsServerStatus(self,comeFrom):
-            
+    def getBestMetricsServerStatus(self, comeFrom):
             print(f"First one to get stream")
-        
-            timestamp = 9999999999
+            
+            timestamp = float('inf')
+            jumps = float('inf')
             neighbourAux = ''
-            jumps = 9999999999
-
 
             for neighbour in self.serverStatus.keys():
-                
-                if(neighbour not in comeFrom):
 
+                if neighbour not in comeFrom:
                     print(f"Neighbour = {neighbour}")
+                    
+                    # Pegar métricas do vizinho
+                    neighbour_timestamp = self.serverStatus[neighbour]['timestamp']
+                    neighbour_jumps = self.serverStatus[neighbour]['jumps']
 
-                    """
-                    responseTime = self.checkLatencyWithPing(neighbour)
-                    print(f"Neighbour response time = {responseTime}")
-
-                    if abs(responseTime < timestamp):
-                            neighbourAux = neighbour
-                            timestamp = responseTime
-                    """
-
-               
-                    #print(self.serverStatus[neighbour]['timestamp'] , timestamp)
-
-
-                    # em caso de a variacao ser superior a 10% verifica-se o nº de saltos
-                    if abs(self.serverStatus[neighbour]['timestamp'] - timestamp) < 0.1 * min(self.serverStatus[neighbour]['timestamp'],timestamp):
-                        if (self.serverStatus[neighbour]['jumps'] < jumps):
-                            neighbourAux = neighbour
-                            timestamp = self.serverStatus[neighbour]['timestamp']
-                            jumps = self.serverStatus[neighbour]['jumps']    
-                    elif self.serverStatus[neighbour]['timestamp'] < timestamp:
+                    # Decisão primária: menor timestamp
+                    # timestamp é uma medida mais completa logo é a primeira a ser verificada
+                    if neighbour_timestamp < timestamp:
                         neighbourAux = neighbour
-                        timestamp = self.serverStatus[neighbour]['timestamp'] 
-                        jumps = self.serverStatus[neighbour]['jumps']
+                        timestamp = neighbour_timestamp
+                        jumps = neighbour_jumps
 
-                        
-                    
-                    #print(self.serverStatus[neighbour]['jumps'] , jumps)
+                    # Decisão secundária: diferença de timestamps dentro de 10%
+                    # Caso os timestamps sejam muito próximos, usa-se o numero de saltos
+                    elif abs(neighbour_timestamp - timestamp) < 0.1 * min(neighbour_timestamp, timestamp):
 
-
-                    if (self.serverStatus[neighbour]['jumps'] < jumps):
+                        # Escolher pelo menor número de jumps
+                        if neighbour_jumps < jumps:
                             neighbourAux = neighbour
-                            timestamp = self.serverStatus[neighbour]['timestamp']
-                            jumps = self.serverStatus[neighbour]['jumps'] 
-                    
-                    
-                    print(f"Jumps to reach server = {self.serverStatus[neighbour]['jumps']}")
-                    #print(neighbour,neighbourAux)
-                
+                            timestamp = neighbour_timestamp
+                            jumps = neighbour_jumps
+
+                    print(f"Jumps to reach server = {neighbour_jumps}")
+
             return neighbourAux
     
 
@@ -441,45 +432,40 @@ class database:
 
     # calcular as melhores metricas para uma stream (1º timestamp, 2º jumps)
     # usado quando já existe uma stream na rede
-    def getBestMetricsRouteStreamDict(self,filename):
-            
-            print("Trying to get stream from a neighbour who is already streaming")
+    def getBestMetricsRouteStreamDict(self, filename):
+        print("Trying to get stream from a neighbour who is already streaming")
 
-            dict =  self.routeStreamDict[filename]
+        dict = self.routeStreamDict[filename]
 
-            timestamp = 9999999999
-            neighbourAux = ''
-            jumps = 9999999999
+        timestamp = float('inf')  # Inicializa com infinito para clareza
+        jumps = float('inf')
+        neighbourAux = ''
 
-            for neighbour in dict.keys():
+        for neighbour in dict.keys():
+            print(f"Neighbour = {neighbour}")
 
-                print(f"Neighbour = {neighbour}")
+            # Pegar métricas do vizinho
+            neighbour_timestamp = dict[neighbour]['timestamp']
+            neighbour_jumps = dict[neighbour]['jumps']
 
-                #print(dict[neighbour]['timestamp'] , timestamp)
-            
-                # em caso de a variacao ser superior a 10% verifica-se o nº de saltos
-                if (abs(dict[neighbour]['timestamp'] - timestamp) < 0.1 * timestamp):
-                    if dict[neighbour]['jumps'] < jumps:
-                        timestamp = dict[neighbour]['timestamp']
-                        neighbourAux = neighbour
-                        jumps = dict[neighbour]['jumps']
-                        
-                elif dict[neighbour]['timestamp'] < timestamp:
+            # Decisão primária: menor timestamp
+            # timestamp é uma medida mais completa logo é a primeira a ser verificada
+            if neighbour_timestamp < timestamp:
+                neighbourAux = neighbour
+                timestamp = neighbour_timestamp
+                jumps = neighbour_jumps
+
+            # Decisão secundária: diferença de timestamps dentro de 10%
+            # Caso os timestamps sejam muito próximos, usa-se o numero de saltos
+            elif abs(neighbour_timestamp - timestamp) < 0.1 * min(neighbour_timestamp, timestamp):
+                if neighbour_jumps < jumps:
                     neighbourAux = neighbour
-                    timestamp = dict[neighbour]['timestamp']
-                    jumps = dict[neighbour]['jumps']
+                    timestamp = neighbour_timestamp
+                    jumps = neighbour_jumps
 
+            print(f"Closest stream in {neighbour_jumps} jumps")
 
-                if dict[neighbour]['jumps'] < jumps:
-                        timestamp = dict[neighbour]['timestamp']
-                        neighbourAux = neighbour
-                        jumps = dict[neighbour]['jumps']
-
-                print(f"Closest stream in {dict[neighbour]['jumps']} jumps")
-                
-                #print(neighbour,neighbourAux)
-            
-            return neighbourAux
+        return neighbourAux
 
 
 
