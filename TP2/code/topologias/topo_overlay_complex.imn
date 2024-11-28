@@ -786,7 +786,7 @@ annotation a3 {
 }
 
 annotation a4 {
-    iconcoords {696.0 7.0 1779.0 610.0}
+    iconcoords {696.0 5.0 1834.0 610.0}
     type rectangle
     label {Rede CDN}
     labelcolor black
