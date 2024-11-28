@@ -44,8 +44,8 @@ node n3 {
 	!
     }
     canvas c1
-    iconcoords {49.0 377.0}
-    labelcoords {49.0 409.0}
+    iconcoords {54.0 359.0}
+    labelcoords {54.0 391.0}
     interface-peer {eth0 n6}
 }
 
@@ -61,8 +61,8 @@ node n4 {
 	!
     }
     canvas c1
-    iconcoords {47.0 506.0}
-    labelcoords {47.0 538.0}
+    iconcoords {51.0 449.0}
+    labelcoords {51.0 481.0}
     interface-peer {eth0 n6}
 }
 
@@ -92,6 +92,7 @@ node n6 {
     interface-peer {e0 n3}
     interface-peer {e1 n4}
     interface-peer {e2 n8}
+    interface-peer {e3 n23}
 }
 
 node n7 {
@@ -556,6 +557,23 @@ node n22 {
     interface-peer {eth0 n18}
 }
 
+node n23 {
+    type router
+    model PC
+    network-config {
+	hostname c5
+	!
+	interface eth0
+	 ip address 10.0.1.22/24
+	 ipv6 address 2001:1::22/64
+	!
+    }
+    canvas c1
+    iconcoords {53.0 530.0}
+    labelcoords {56.0 566.0}
+    interface-peer {eth0 n6}
+}
+
 link l1 {
     nodes {n1 n5}
     bandwidth 0
@@ -662,7 +680,6 @@ link l20 {
 }
 
 link l21 {
-    delay 130000
     nodes {n16 n20}
     bandwidth 0
 }
@@ -679,10 +696,8 @@ link l23 {
 }
 
 link l24 {
-    delay {73000 100000}
     color Magenta
     nodes {n17 n20}
-    bandwidth {0 0}
 }
 
 link l25 {
@@ -710,29 +725,35 @@ link l28 {
 }
 
 link l29 {
+    delay 15000
     color Magenta
     nodes {n19 n21}
     bandwidth 0
 }
 
 link l30 {
+    delay 15000
     color Magenta
     nodes {n20 n21}
     bandwidth 0
 }
 
 link l31 {
-    delay {{} 90000}
     color Magenta
     nodes {n14 n17}
     bandwidth {0 {}}
 }
 
 link l32 {
+    delay 15000
     color Magenta
-    delay 90000
     nodes {n18 n22}
     bandwidth {0 {}}
+}
+
+link l33 {
+    nodes {n6 n23}
+    bandwidth 0
 }
 
 annotation a1 {
@@ -803,7 +824,7 @@ annotation a6 {
 }
 
 annotation a7 {
-    iconcoords {30.0 549.0}
+    iconcoords {34.0 488.0}
     type text
     label {C2}
     labelcolor #d801f1
@@ -919,7 +940,7 @@ annotation a10 {
 }
 
 annotation a18 {
-    iconcoords {31.0 413.0}
+    iconcoords {37.0 399.0}
     type text
     label {C3}
     labelcolor #d801f1
@@ -969,6 +990,17 @@ annotation a22 {
     labelcolor #d801f1
     fontfamily {Arial}
     fontsize {20}
+    effects {bold}
+    canvas c1
+}
+
+annotation a23 {
+    iconcoords {38.0 576.0}
+    type text
+    label {C5}
+    labelcolor #d801f1
+    fontfamily {Arial}
+    fontsize 20
     effects {bold}
     canvas c1
 }
