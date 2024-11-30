@@ -19,7 +19,7 @@ import traceback
 
 #leitura do ficheiro de configuração da topologia
 def readConfigFile(topo):
-    print('reading config file ..')
+    #print('reading config file ..')
     with open(topo) as json_file:
         data = json.load(json_file)
     return data
@@ -263,6 +263,7 @@ def run_server(topologia, opt_boot):
     #option = int(sys.argv[2])
 
     if(option==1):      # valor 1 indica que é o bootstrapper, caso o valor seja 0 é um servidor normal
+        print('reading config file ..')
         Thread(target=initializeConnections, args = (database,)).start()
         Thread(target=clientConnectionsLoginReceive, args = (database,)).start()
 
