@@ -91,7 +91,7 @@ def sendStatusServerNetwork(database):
     neighbours = database.getTopo()[myname]['neighbours']
     #print(neighbours)
     i = 0
-    downs = set()
+    #downs = set()
     visited = ""
     
     while True:
