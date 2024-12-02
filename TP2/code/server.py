@@ -87,10 +87,12 @@ def initializeConnections(database):
 #função responsável por monitorizar a rede overlay
 def sendStatusServerNetwork(database):
     
-    
     myname = socket.gethostname()
     neighbours = database.getTopo()[myname]['neighbours']
+    #print(neighbours)
     i = 0
+    downs = set()
+    visited = ""
     
     while True:
 
@@ -101,14 +103,14 @@ def sendStatusServerNetwork(database):
                 try:
                     status_socket = socket.socket()  # instantiate
                     status_socket.connect((neighbour, 4444))  # connect to the server
-                    message = f'servername:{myname} time:{time.time()} jumps:{1} visited:'
+                    message = f'servername:{myname} time:{time.time()} jumps:{1} visited:{visited}'
                     status_socket.send(message.encode())  # send message
                     connected = True
                     print('connected')
                     i = i + 1
                     
                 except:
-                    #print('all my neighbours are offline')
+                    #print(f'neighbours down: {downs}')
                     pass
         sleep(30)
 
@@ -263,7 +265,6 @@ def run_server(topologia, opt_boot):
     #option = int(sys.argv[2])
 
     if(option==1):      # valor 1 indica que é o bootstrapper, caso o valor seja 0 é um servidor normal
-        print('reading config file ..')
         Thread(target=initializeConnections, args = (database,)).start()
         Thread(target=clientConnectionsLoginReceive, args = (database,)).start()
 

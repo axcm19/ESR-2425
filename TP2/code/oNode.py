@@ -9,6 +9,7 @@ from time import sleep
 import re
 import netifaces
 import ServerWorker
+from time import sleep
 
 
 
@@ -312,83 +313,78 @@ def neighboursRequest(host_to_connect,database):
                 
 # receber o STATUS
 def receiveStatusServerNetwork(database):
+    # Criação do socket para receber conexões
+    status_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    status_socket.bind(('', 4444))  
+    status_socket.listen(10)
+
+    while True: 
+        conn, address = status_socket.accept()
+        print(f'Received from {address[0]}', flush=True)
+        print('\n')
+        
+        # Receber dados
+        data = conn.recv(1024)
+        msg = data.decode()
+        print(msg, flush=True)
+        print('\n')
+
+        # Processar mensagem recebida
+        splitted = re.split(r'[\s\n]+', msg.strip())  # Divide por espaços ou quebras de linha
+        connection = {}
+        timeserver = 0
+
+        # Extrair as métricas da mensagem
+        for string in splitted:
+            s = re.split(r':', string)
+            if s[0] == 'servername':
+                connection['servername'] = s[1]
+            elif s[0] == 'time':
+                timeserver += float(s[1])
+                connection['timestamp'] = time.time() - float(s[1])
+            elif s[0] == 'jumps':
+                connection['jumps'] = int(s[1])
+            elif s[0] == 'downs':
+                connection['downs'] = re.split(r',', s[1]) if len(s) > 1 else []
+            elif s[0] == 'visited':
+                connection['visited'] = re.split(r',', s[1]) if len(s) > 1 else []
+
+        # Obter os nomes do nó local
+        mynames = getMyNames()
+
+        # Construir as listas de visited e downs
+        visited_list = connection.get('visited', []) + mynames
+        visited = ",".join(filter(None, visited_list))
+        downs = ",".join(connection.get('downs', []))
+
+        # Atualizar o status no banco de dados
+        database.putConnectionServerStatus(address[0], connection)
+
+        # Enviar métricas para os vizinhos
+        for neighbour in database.getNeighbours():
+            if neighbour not in connection.get('visited', []):
+                connected = False
+                while not connected: 
+                    try:
+                        message = (
+                            f'servername:{connection["servername"]}\n'
+                            f'time:{timeserver}\n'
+                            f'jumps:{connection["jumps"] + 1}\n'
+                            #f'downs:{downs}\n'
+                            f'visited:{visited}\n'
+                        )
+                        status_socket_send = socket.socket()
+                        status_socket_send.connect((neighbour, 4444))
+                        status_socket_send.send(message.encode())
+                        status_socket_send.close()
+                        connected = True
+                    except:
+                        downs += ("," + address[0])
+                        print(f'Neighbour {neighbour} is offline', flush=True)
+                        sleep(10)
+                        pass
 
         
-        status_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        status_socket.bind(('', 4444))  
-        status_socket.listen(10)
-
-        while True: 
-                conn, address = status_socket.accept()
-                
-                #print('received from ',address[0],flush=True)
-                data = conn.recv(1024)
-                #print(data.decode(),flush=True)
-
-                msg = data.decode()
-
-                splitted = re.split(' ',msg)
-
-                connection = {}
-                
-                timeserver = 0
-                for string in splitted:                 # proceder á analise das métricas
-                    s = re.split(r':',string)
-                    if s[0] == 'servername':
-                        servername = s[1]
-                        connection['servername'] = servername
-                    if s[0] == 'time':
-                        timeserver += float(s[1])
-                        timestamp = time.time() - float(s[1])
-                        connection['timestamp'] = timestamp
-                    if s[0] == 'jumps':
-                        jumps = int(s[1])
-                        connection['jumps'] = jumps
-                    if s[0] == 'visited':
-                        visited = re.split(',',s[1])
-                        if '' in visited : visited.remove('')
-                        connection['visited'] = visited
-                
-                #get my names
-                mynames = getMyNames()
-
-                #construct visited list with all node names
-                visited = ""
-                index = 0
-                if len(connection['visited']) != 0:
-                        for vis in connection['visited']:
-                                if(index == 0):
-                                        visited = visited + vis
-                                else:
-                                        visited = visited + ',' + vis
-                                index = index + 1
-
-                        for name in mynames:
-                                visited = visited + ',' + name
-                                
-                else:
-                        for name in mynames:
-                                if index == 0 :visited = visited + name
-                                else: visited = visited + ',' + name
-                                index = index + 1
-                                
-
-                database.putConnectionServerStatus(address[0],connection)       # atualizar
-                
-                message = f'servername:{connection["servername"]} time:{timeserver} jumps:{connection["jumps"] + 1} visited:{visited}'
-
-                for neighbour in database.getNeighbours():                      # envio das métricas para os vizinhos
-                        if(neighbour not in connection['visited']):
-                                connected = False
-                                while connected == False: 
-                                    try:
-                                        status_socket_send = socket.socket()
-                                        status_socket_send.connect((neighbour,4444))
-                                        status_socket_send.send(message.encode())
-                                        status_socket_send.close()
-                                        connected = True
-                                    except:
-                                        pass
 
 
 
