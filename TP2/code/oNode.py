@@ -360,19 +360,20 @@ def receiveStatusServerNetwork(database):
         # Atualizar o status no banco de dados
         database.putConnectionServerStatus(address[0], connection)
 
+        message = (
+                f'servername:{connection["servername"]}\n'
+                f'time:{timeserver}\n'
+                f'jumps:{connection["jumps"] + 1}\n'
+                #f'downs:{downs}\n'
+                f'visited:{visited}\n'
+        )
+
         # Enviar métricas para os vizinhos
         for neighbour in database.getNeighbours():
             if neighbour not in connection.get('visited', []):
                 connected = False
                 while not connected: 
                     try:
-                        message = (
-                            f'servername:{connection["servername"]}\n'
-                            f'time:{timeserver}\n'
-                            f'jumps:{connection["jumps"] + 1}\n'
-                            #f'downs:{downs}\n'
-                            f'visited:{visited}\n'
-                        )
                         status_socket_send = socket.socket()
                         status_socket_send.connect((neighbour, 4444))
                         status_socket_send.send(message.encode())
