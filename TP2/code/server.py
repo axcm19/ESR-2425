@@ -91,7 +91,6 @@ def sendStatusServerNetwork(database):
     neighbours = database.getTopo()[myname]['neighbours']
     #print(neighbours)
     i = 0
-    #downs = set()
     visited = ""
     
     while True:
@@ -110,10 +109,8 @@ def sendStatusServerNetwork(database):
                     i = i + 1
                     
                 except:
-                    #print(f'neighbours down: {downs}')
                     pass
         sleep(30)
-
 
 
 
@@ -261,8 +258,6 @@ def run_server(topologia, opt_boot):
     database.setTopo(readConfigFile(topologia))
     option = int(opt_boot)
 
-    #database.setTopo(readConfigFile(sys.argv[1]))
-    #option = int(sys.argv[2])
 
     if(option==1):      # valor 1 indica que é o bootstrapper, caso o valor seja 0 é um servidor normal
         Thread(target=initializeConnections, args = (database,)).start()

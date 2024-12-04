@@ -94,28 +94,6 @@ class database:
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
-    """
-    # adicionar uma conexao ao STATUS do servidor (monitorização da rede)
-    def putConnectionServerStatus(self,neighbour,connection):
-
-        if neighbour in  self.serverStatus.keys():
-
-            if self.serverStatus[neighbour]['servername'] != connection['servername']:
-
-                if abs(self.serverStatus[neighbour]['timestamp'] - connection['timestamp']) < 0.1 * min(self.serverStatus[neighbour]['timestamp'],connection['timestamp']):  
-                              
-                        if (self.serverStatus[neighbour]['jumps'] > connection['jumps']):
-                            self.serverStatus[neighbour] = connection   
-
-
-                elif self.serverStatus[neighbour]['timestamp'] > connection['timestamp']:
-                    self.serverStatus[neighbour] = connection
-
-                 
-        else:
-            self.serverStatus[neighbour] = connection
-    """
-
 
     def putConnectionServerStatus(self, neighbour, connection):
    

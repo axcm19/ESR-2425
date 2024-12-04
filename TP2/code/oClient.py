@@ -33,7 +33,6 @@ def send(host_to_connect,filename):
         # Create a new client
         os.environ.__setitem__('DISPLAY', ':0.0')
 
-        #content = "movie.Mjpeg"
         content = filename
 
         app = Client(root, host_to_connect, port, '5008', content)     # criar um worker para o cliente 
@@ -109,8 +108,6 @@ def loginReceive(filename, port_to_receive):
 
     for pop in popsUnParsed:
         popsParsed.append(pop)
-
-    print(f"POPs list received: {popsParsed}")
     
     conn.close()
 
@@ -149,10 +146,8 @@ def loginReceive(filename, port_to_receive):
 
 if __name__ == '__main__':
 
-        #host_to_connect = sys.argv[1]   # endereço do primeiro nodo ao qual se conecta
         boot_ip = sys.argv[1]   # endereço do bootstraper que lhe vai dizer quem ão os POP
 
         filename = sys.argv[2]          # nome do video que pretende receber a stream
-        #Thread(target=send, args = (host_to_connect,filename)).start()
         
         Thread(target=loginSend, args = (boot_ip, filename)).start()

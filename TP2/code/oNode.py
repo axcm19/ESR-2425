@@ -71,7 +71,6 @@ def getStream(database,filename,comeFrom,server):
 
                 try:
                         for receiver in database.getStreamReceivers(filename):          #separação para caso de oNodes
-                                #print(f"new receiver = {receiver}")
                                 udpSocket.sendto(response,receiver)
 
 
@@ -320,14 +319,16 @@ def receiveStatusServerNetwork(database):
 
     while True: 
         conn, address = status_socket.accept()
-        print(f'Received from {address[0]}', flush=True)
-        print('\n')
+        
+        #print(f'Received from {address[0]}', flush=True)
+        #print('\n')
         
         # Receber dados
         data = conn.recv(1024)
         msg = data.decode()
-        print(msg, flush=True)
-        print('\n')
+        
+        #print(msg, flush=True)
+        #print('\n')
 
         # Processar mensagem recebida
         splitted = re.split(r'[\s\n]+', msg.strip())  # Divide por espaços ou quebras de linha
@@ -344,8 +345,6 @@ def receiveStatusServerNetwork(database):
                 connection['timestamp'] = time.time() - float(s[1])
             elif s[0] == 'jumps':
                 connection['jumps'] = int(s[1])
-            elif s[0] == 'downs':
-                connection['downs'] = re.split(r',', s[1]) if len(s) > 1 else []
             elif s[0] == 'visited':
                 connection['visited'] = re.split(r',', s[1]) if len(s) > 1 else []
 
@@ -355,16 +354,15 @@ def receiveStatusServerNetwork(database):
         # Construir as listas de visited e downs
         visited_list = connection.get('visited', []) + mynames
         visited = ",".join(filter(None, visited_list))
-        downs = ",".join(connection.get('downs', []))
 
         # Atualizar o status no banco de dados
         database.putConnectionServerStatus(address[0], connection)
+        
 
         message = (
                 f'servername:{connection["servername"]}\n'
                 f'time:{timeserver}\n'
                 f'jumps:{connection["jumps"] + 1}\n'
-                #f'downs:{downs}\n'
                 f'visited:{visited}\n'
         )
 
@@ -380,8 +378,7 @@ def receiveStatusServerNetwork(database):
                         status_socket_send.close()
                         connected = True
                     except:
-                        downs += ("," + address[0])
-                        print(f'Neighbour {neighbour} is offline', flush=True)
+                        print(f"Neighbour {neighbour} is offline")
                         sleep(10)
                         pass
 
